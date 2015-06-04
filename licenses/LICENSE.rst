@@ -1,4 +1,4 @@
-Copyright (c) year, author
+Copyright (c) 2015, Alexander Ian Hamilton
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification,
