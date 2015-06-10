@@ -20,7 +20,6 @@ class Preprocessors(object):
     that is assumed in many extrapolations, but isn't true in the photosphere
     where magnetiogram observations are generally taken.
     """
-    'Common class for all 2D pre-processing routines.'
     def __init__(self, map_magnetogram):
         """Method for creating a preprocessor object, using a sunpy map.
         """
