@@ -42,49 +42,49 @@ class Extrapolators(object):
     call is extrapolate() which will both call extrapolation() and save the
     result if a filepath argument is given.
     """
-    
+
     def __init__(self, map_magnetogram, **kwargs):
-        """Construct an extrapolator using the given 2D map.        
+        """Construct an extrapolator using the given 2D map.
         """
         self.data_boundary_map = map_magnetogram
         self.meta = { 'boundary_1_meta': map_magnetogram }
         self.z = 10
         if kwargs.get('z'):
-            self.filepath = kwargs['z']        
+            self.filepath = kwargs['z']
         self.filepath = ''
         if kwargs.get('filepath'):
             self.filepath = kwargs['filepath']
-    
+
     def extrapolation(self):
         """
         The routine for running an extrapolation routine.
         This is the primary method to be edited in subclasses for specific
         extrapolation routine implementations.
         """
-        # Add some type checking, we want a map object, check for .unit attribute.        
+        # Add some type checking, we want a map object, check for .unit attribute.
         # Extrapolation code goes here.
         arr_4d = np.zeros([0, 0, 0, 0])
         self.meta['extrapolation_routine'] = 'default extrapolator class'
         return Map3D( arr_4d, self.meta, True )
-    
+
     def extrapolate(self):
         """
         Method to be called to run the extrapolation.
         Times and saves the extrapolation where applicable.
         """
-        tim_start = time.time()        
+        tim_start = time.time()
         arr_output = self.extrapolation()
         tim_duration = time.time() - tim_start
-        
+
         arr_output.meta['extrapolation_start_time'] = tim_start
         arr_output.meta['extrapolation_duration'] = tim_duration
-        
+
         if self.filepath:
             arr_output.save(self.filepath)
         return arr_output
-        
 
-        
+
+
 class AnalyticalModel(object):
     def __init__(self):
         dim = 16
@@ -94,12 +94,12 @@ class AnalyticalModel(object):
         magnetogram = np.zeros([dim, dim])
         magnetogram_header  = {'ZNAXIS': 2, 'ZNAXIS1': dim, 'ZNAXIS2': dim}
         self.magnetogram = sunpy.map.Map((magnetogram, magnetogram_header))
-        
-        
+
+
     def generate(self):
         # Extrapolate the vector field and return.
         return self.map
-        
+
     def to_magnetogram(self):
         # Extrapolate the vector field and return.
         return self.magnetogram
@@ -116,7 +116,7 @@ class Map3D(object):
         self.data = arr_data
         self.is_vector = vectors
         self.is_scalar = not(vectors) # Redundant
-        
+
     def is_vector(self):
         return self.is_vector
 
@@ -125,7 +125,7 @@ class Map3D(object):
 
     def meta(self):
         return self.meta
-    
+
     def data(self):
         return self.data
 
@@ -155,8 +155,8 @@ class Map3D(object):
         self.data = loaded.data
         self.is_vector = loaded.is_vector
         self.is_scalar = loaded.is_scalar
-        
-    
+
+
 
 
 
@@ -171,14 +171,14 @@ class Map3DCube:
         # Hack to get around Python 2.x not backporting PEP 3102.
         #sortby = kwargs.pop('sortby', 'date')
         #derotate = kwargs.pop('derotate', False)
-        
+
         self.maps = expand_list(args)
-        
+
         for m in self.maps:
             if not isinstance(m, Map3D):
                 raise ValueError(
                            'CompositeMap expects pre-constructed map objects.')
-    
+
     def __getitem__(self, key):
         """Overriding indexing operation.  If the key results in a single map,
         then a map object is returned.  This allows functions like enumerate to
@@ -188,31 +188,31 @@ class Map3DCube:
             return self.maps[key]
         else:
             return Map3DCube(self.maps[key])
-            
+
     def __len__(self):
         """Return the number of maps in a mapcube."""
         return len(self.maps)
-        
+
 class Map3DComparer(object):
     def __init__(self, map3D, *args, **kwargs):
         self.maps = expand_list(args)
-        
+
         for m in self.maps:
             if not isinstance(m, Map3D):
                 raise ValueError(
                          'CompositeMap expects pre-constructed map3D objects.')
-        
+
         self.normalize_all = True
         if kwargs.get('normalize'):
             self.normalize = kwargs['normalize']
         self.normalize_to = 0
         if kwargs.get('normalize_to'):
-            self.normalize = kwargs['normalize_to']        
-      
+            self.normalize = kwargs['normalize_to']
+
     def L_infin_norm(map_field, benchmark):
         # Placeholder for the maximum value.
         output = - 10.0**15
-        
+
         # Iterate through the volume
         ni, nj, nk, D = map_field.shape
         for i in range(0, ni):
@@ -222,13 +222,13 @@ class Map3DComparer(object):
                     component_sum = 0.0
                     for component in map_field[i][j][k]:
                         component_sum += component
-                        
+
                     # If this is bigger then the current max value.
                     if output < component_sum:
                         output = component_sum
-        
-        
-        
+
+
+
         # Output
         return output
 
@@ -236,50 +236,50 @@ class Map3DComparer(object):
         num_tests = 1
         num_maps = len(self.maps)
         arr_data = np.zeros([num_tests, num_maps])
-        
+
         for map3D in self.maps:
             arr_data = map3D.data
             result = self.L_infin_norm(arr_data)
-    
-    
-        
+
+
+
 ############
 #
 #  Examples
 #
 #######
+if __name__ == '__main__':
+    class PreZeros(Preprocessors):
+        def __init__(self, map_magnetogram):
+            super(PreZeros, self).__init__(map_magnetogram)
 
-class PreZeros(Preprocessors):
-    def __init__(self, map_magnetogram):
-        super(PreZeros, self).__init__(map_magnetogram)
+        def preprocess(self):
+            #return self.data_map
+            return sunpy.map.Map((np.zeros(self.data_map.data.shape),self.data_map.meta))
 
-    def preprocess(self):
-        #return self.data_map        
-        return sunpy.map.Map((np.zeros(self.data_map.data.shape),self.data_map.meta))
-
-aMap2D = sunpy.map.Map('C://Users//Alex//Dropbox//Study//2014-2015//SoCiS//Coding//Python//Random//data//hmi.m_720s.2015.05.01_00-12-00_TAI.magnetogram.fits')
-aPrePro = PreZeros(aMap2D.submap([0,10], [0,10]))
-aPreProData = aPrePro.preprocess()
-# aPreProData = aMap2D.submap([0,10], [0,10])
-
-
-class ExtZeros(Extrapolators):
-    def __init__(self, map_magnetogram, **kwargs):
-        super(ExtZeros, self).__init__(map_magnetogram, **kwargs)
-
-    def extrapolation(self):
-        arr_4d = np.zeros([self.data_boundary_map.data.shape[0], self.data_boundary_map.data.shape[0], self.z, 3])
-        return Map3D(arr_4d, self.meta, True)
-
-aMap2D = sunpy.map.Map('C://Users//Alex//Dropbox//Study//2014-2015//SoCiS//Coding//Python//Random//data//hmi.m_720s.2015.05.01_00-12-00_TAI.magnetogram.fits')
-aPreProData = aMap2D.submap([0,10], [0,10])
-aExt = ExtZeros(aPreProData, filepath='C://Users/Alex/solarextrapolation/solarextrapolation/3Dmap.m3d')
-aMap3D = aExt.extrapolate()
-
-aExt = ExtZeros(aPreProData)
+    aMap2D = sunpy.map.Map('C://Users//Alex//Dropbox//Study//2014-2015//SoCiS//Coding//Python//Random//data//hmi.m_720s.2015.05.01_00-12-00_TAI.magnetogram.fits')
+    aPrePro = PreZeros(aMap2D.submap([0,10], [0,10]))
+    aPreProData = aPrePro.preprocess()
+    # aPreProData = aMap2D.submap([0,10], [0,10])
 
 
+    class ExtZeros(Extrapolators):
+        def __init__(self, map_magnetogram, **kwargs):
+            super(ExtZeros, self).__init__(map_magnetogram, **kwargs)
+
+        def extrapolation(self):
+            arr_4d = np.zeros([self.data_boundary_map.data.shape[0], self.data_boundary_map.data.shape[0], self.z, 3])
+            return Map3D(arr_4d, self.meta, True)
+
+    aMap2D = sunpy.map.Map('C://Users//Alex//Dropbox//Study//2014-2015//SoCiS//Coding//Python//Random//data//hmi.m_720s.2015.05.01_00-12-00_TAI.magnetogram.fits')
+    aPreProData = aMap2D.submap([0,10], [0,10])
+    aExt = ExtZeros(aPreProData, filepath='C://Users/Alex/solarextrapolation/solarextrapolation/3Dmap.m3d')
+    aMap3D = aExt.extrapolate()
+
+    aExt = ExtZeros(aPreProData)
 
 
-#class Greens_Potential(Extrapolators):
-#    super(Extrapolators, self).__init__(map_magnetogram)
+
+
+    #class Greens_Potential(Extrapolators):
+    #    super(Extrapolators, self).__init__(map_magnetogram)
