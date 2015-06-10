@@ -102,8 +102,12 @@ release = package.__version__
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes. To override the custom theme, set this to the
 # name of a builtin theme or the name of a custom theme in html_theme_path.
-#html_theme = None
-
+try:
+    import sphinx_rtd_theme
+    html_theme = 'sphinx_rtd_theme'
+    html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
+except ImportError:
+        html_theme = 'default'
 # Custom sidebar templates, maps document names to template names.
 #html_sidebars = {}
 
