@@ -20,16 +20,41 @@ class Preprocessors(object):
     that is assumed in many extrapolations, but isn't true in the photosphere
     where magnetiogram observations are generally taken.
     """
-    def __init__(self, map_magnetogram):
+    def __init__(self, map_data, **kwargs):
         """Method for creating a preprocessor object, using a sunpy map.
         """
         # Add some type checking, we want a map object, check for .unit attribute.
-        self.data_map = map_magnetogram
+        self.map_input = map_data
+        self.routine = kwargs.get('preprocessor_routine', type(self))
+        self.meta = { 'original_map_header': self.map_input.meta, 'preprocessor_routine': self.routine }
+        self.filepath = kwargs.get('filepath', None)
+
+    def _preprocessor(self):
+        """
+        Method running the and returning a sunpy map.
+        For tracability this should add entries into the metadata that
+        include any parameters used for the given run.
+        """
+        map_output = sunpy.map.Map(self.map_input.data, self.meta)
+        return map_output
 
     def preprocess(self):
-        """Method running the preprocessor and returning a sunpy map.
+        
         """
-        return self.data_map
+        Method to be called to run the preprocessor.
+        Times the process and saves output where applicable.
+        """
+        tim_start = time.time()
+        map_output = self._preprocessor()
+        tim_duration = time.time() - tim_start
+
+        map_output.meta['preprocessor_start_time'] = tim_start
+        map_output.meta['preprocessor_duration'] = tim_duration
+
+        if self.filepath:
+            map_output.save(self.filepath)
+        return map_output
+    
 
 
 class Extrapolators(object):
@@ -46,16 +71,14 @@ class Extrapolators(object):
     def __init__(self, map_magnetogram, **kwargs):
         """Construct an extrapolator using the given 2D map.
         """
-        self.data_boundary_map = map_magnetogram
-        self.meta = { 'boundary_1_meta': map_magnetogram }
-        self.z = 10
-        if kwargs.get('z'):
-            self.filepath = kwargs['z']
-        self.filepath = ''
-        if kwargs.get('filepath'):
-            self.filepath = kwargs['filepath']
+        self.map_boundary_data = map_magnetogram
+        self.meta = { 'boundary_1_meta': self.map_boundary_data.meta }
+        self.z = kwargs.get('z', 10)
+        self.filepath = kwargs.get('filepath', None)
+        self.routine = kwargs.get('extrapolator_routine', type(self))
+        self.meta = { 'original_map_header': self.map_boundary_data.meta, 'extrapolator_routine': self.routine }
 
-    def extrapolation(self):
+    def _extrapolation(self):
         """
         The routine for running an extrapolation routine.
         This is the primary method to be edited in subclasses for specific
@@ -64,8 +87,9 @@ class Extrapolators(object):
         # Add some type checking, we want a map object, check for .unit attribute.
         # Extrapolation code goes here.
         arr_4d = np.zeros([0, 0, 0, 0])
-        self.meta['extrapolation_routine'] = 'default extrapolator class'
-        return Map3D( arr_4d, self.meta, True )
+        map_output = Map3D(( arr_4d, self.meta ))
+        
+        return map_output
 
     def extrapolate(self):
         """
@@ -73,11 +97,11 @@ class Extrapolators(object):
         Times and saves the extrapolation where applicable.
         """
         tim_start = time.time()
-        arr_output = self.extrapolation()
+        arr_output = self._extrapolation()
         tim_duration = time.time() - tim_start
 
-        arr_output.meta['extrapolation_start_time'] = tim_start
-        arr_output.meta['extrapolation_duration'] = tim_duration
+        arr_output.meta['extrapolator_start_time'] = tim_start
+        arr_output.meta['extrapolator_duration'] = tim_duration
 
         if self.filepath:
             arr_output.save(self.filepath)
@@ -111,23 +135,61 @@ class Map3D(object):
     vectors and metadata.
     The structure can be saved/loaded (using pickle ATM).
     """
-    def __init__(self, arr_data = np.zeros([0,0,0]), dic_meta = {}, vectors = False):
+    def __init__(self, input, **kwargs):
+        self.data = np.zeros((0,0,0))
+        self.meta = {}
+        
+        if isinstance(input, basestring):
+            loaded = pickle.load( open( input, "rb" ) )
+            self.data = loaded.data
+            self.meta = loaded.meta
+        elif isinstance(input, tuple):
+            self.data = input[0]
+            self.meta = input[1]
+    
+    @property
+    def is_scalar(self):
+        return (True if self.data.ndim is 3 else False)
+
+
+# #### I/O routines #### #
+    def save(self, filepath, filetype='auto', **kwargs):
+        """Saves the Map3D object to a file.
+
+        Currently uses Python pickle.
+        https://docs.python.org/2/library/pickle.html
+        In the future support will be added for saving to other formats.
+
+        Parameters
+        ----------
+        filepath : string
+            Location to save file to.
+
+        filetype : string
+            'auto' or any supported file extension
+        """
+        #io.write_file(filepath, self.data, self.meta, filetype=filetype,
+        #              **kwargs)
+        pickle.dump( self, open( filepath, "wb" ), **kwargs )
+
+
+'''
+class Map3D(object):
+    """
+    A basic data structure for holding a 3D numpy array of floats or 3-float
+    vectors and metadata.
+    The structure can be saved/loaded (using pickle ATM).
+    """
+    def __init__(self, arr_data, dic_meta=None, vectors=False):
+        if not dic_meta: dic_meta = {}
         self.meta = dic_meta
         self.data = arr_data
-        self.is_vector = vectors
-        self.is_scalar = not(vectors) # Redundant
-
-    def is_vector(self):
-        return self.is_vector
-
+        
+    
+    @property
     def is_scalar(self):
-        return self.is_scalar
+        return True if self.data.ndim is 3 else False
 
-    def meta(self):
-        return self.meta
-
-    def data(self):
-        return self.data
 
 # #### I/O routines #### #
     def save(self, filepath, filetype='auto', **kwargs):
@@ -153,11 +215,8 @@ class Map3D(object):
         loaded = pickle.load( open( fname, "rb" ) )
         self.meta = loaded.meta
         self.data = loaded.data
-        self.is_vector = loaded.is_vector
-        self.is_scalar = loaded.is_scalar
 
-
-
+'''
 
 
 
@@ -184,7 +243,7 @@ class Map3DCube:
         then a map object is returned.  This allows functions like enumerate to
         work.  Otherwise, a mapcube is returned."""
 
-        if isinstance(self.maps[key],Map3D):
+        if isinstance(self.maps[key], Map3D):
             return self.maps[key]
         else:
             return Map3DCube(self.maps[key])
@@ -192,6 +251,7 @@ class Map3DCube:
     def __len__(self):
         """Return the number of maps in a mapcube."""
         return len(self.maps)
+
 
 class Map3DComparer(object):
     def __init__(self, map3D, *args, **kwargs):
@@ -249,36 +309,71 @@ class Map3DComparer(object):
 #
 #######
 if __name__ == '__main__':
+    aNewMap3D = Map3D()
+    
+    # Testing a preprocessor
+    
     class PreZeros(Preprocessors):
         def __init__(self, map_magnetogram):
             super(PreZeros, self).__init__(map_magnetogram)
 
-        def preprocess(self):
-            #return self.data_map
-            return sunpy.map.Map((np.zeros(self.data_map.data.shape),self.data_map.meta))
+        def _preprocessor(self):
+            # Adding in custom parameters to the meta
+            self.meta['preprocessor_routine'] = 'Zeros Preprocessor'
+            
+            # Creating the trivial zeros map of teh shape of the input map
+            map_output = sunpy.map.Map((np.zeros(self.map_input.data.shape), 
+                                        self.meta))
+            
+            # Outputting the map.
+            return map_output
 
     aMap2D = sunpy.map.Map('C://Users//Alex//Dropbox//Study//2014-2015//SoCiS//Coding//Python//Random//data//hmi.m_720s.2015.05.01_00-12-00_TAI.magnetogram.fits')
     aPrePro = PreZeros(aMap2D.submap([0,10], [0,10]))
     aPreProData = aPrePro.preprocess()
     # aPreProData = aMap2D.submap([0,10], [0,10])
+    
+    # Some checks:
+    #aPreProData.data # Should be a 2D zeros array.
+    #aPreProData.meta
+    #aPreProData.meta['preprocessor_routine']
+    #aPreProData.meta['preprocessor_start_time']
 
-
+    
+    # Testing an extrapolator
+    
     class ExtZeros(Extrapolators):
         def __init__(self, map_magnetogram, **kwargs):
             super(ExtZeros, self).__init__(map_magnetogram, **kwargs)
 
-        def extrapolation(self):
-            arr_4d = np.zeros([self.data_boundary_map.data.shape[0], self.data_boundary_map.data.shape[0], self.z, 3])
-            return Map3D(arr_4d, self.meta, True)
+        def _extrapolation(self):
+            # Adding in custom parameters to the meta
+            self.meta['extrapolator_routine'] = 'Zeros Extrapolator'
 
-    aMap2D = sunpy.map.Map('C://Users//Alex//Dropbox//Study//2014-2015//SoCiS//Coding//Python//Random//data//hmi.m_720s.2015.05.01_00-12-00_TAI.magnetogram.fits')
-    aPreProData = aMap2D.submap([0,10], [0,10])
+            arr_4d = np.zeros([self.map_boundary_data.data.shape[0], self.map_boundary_data.data.shape[0], self.z, 3])
+            return Map3D(( arr_4d, self.meta ))
+
     aExt = ExtZeros(aPreProData, filepath='C://Users/Alex/solarextrapolation/solarextrapolation/3Dmap.m3d')
     aMap3D = aExt.extrapolate()
+    
+    # Some checks:
+    #aMap3D.data # Should be a 4D zeros array.
+    #aMap3D.meta
+    #aMap3D.meta['extrapolator_routine']
+    #aMap3D.meta['extrapolator_start_time']
+    
+    # Testing a Map3DCube
+    
+    aMapCube = Map3DCube(aMap3D, aMap3D)
+    aMapCube[0]
+    aMapCube[0].data
+    aMapCube[0].meta
+    aMapCube[1].data
+    aMapCube[1].meta
 
-    aExt = ExtZeros(aPreProData)
-
-
+    
+    
+    
 
 
     #class Greens_Potential(Extrapolators):
