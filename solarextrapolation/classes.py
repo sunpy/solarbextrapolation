@@ -135,24 +135,20 @@ class Map3D(object):
     vectors and metadata.
     The structure can be saved/loaded (using pickle ATM).
     """
-    def __init__(self, input, **kwargs):
-        self.data = np.zeros((0,0,0))
-        self.meta = {}
-        
-        if isinstance(input, basestring):
-            loaded = pickle.load( open( input, "rb" ) )
-            self.data = loaded.data
-            self.meta = loaded.meta
-        elif isinstance(input, tuple):
-            self.data = input[0]
-            self.meta = input[1]
+    def __init__(self, data, meta, **kwargs):
+        self.data = data
+        self.meta = meta
     
     @property
     def is_scalar(self):
         return (True if self.data.ndim is 3 else False)
 
-
 # #### I/O routines #### #
+    @classmethod
+    def load(self, filepath):
+        loaded = pickle.load( open( filepath, "rb" ) )
+        return loaded
+
     def save(self, filepath, filetype='auto', **kwargs):
         """Saves the Map3D object to a file.
 
@@ -171,6 +167,57 @@ class Map3D(object):
         #io.write_file(filepath, self.data, self.meta, filetype=filetype,
         #              **kwargs)
         pickle.dump( self, open( filepath, "wb" ), **kwargs )
+
+'''
+
+class Map3D(object):
+    """
+    A basic data structure for holding a 3D numpy array of floats or 3-float
+    vectors and metadata.
+    The structure can be saved/loaded (using pickle ATM).
+    """
+    def __init__(self, input, **kwargs):
+        self.data = np.zeros((0,0,0))
+        self.meta = {}
+        
+        if isinstance(input, basestring):
+            loaded = pickle.load( open( input, "rb" ) )
+            self.data = loaded.data
+            self.meta = loaded.meta
+        elif isinstance(input, tuple):
+            self.data = input[0]
+            self.meta = input[1]
+    
+    @property
+    def is_scalar(self):
+        return (True if self.data.ndim is 3 else False)
+
+
+# #### I/O routines #### #
+    @classmethod
+    def load(filepath):
+        loaded = pickle.load( open( filepath, "rb" ) )
+        return loaded
+
+    def save(self, filepath, filetype='auto', **kwargs):
+        """Saves the Map3D object to a file.
+
+        Currently uses Python pickle.
+        https://docs.python.org/2/library/pickle.html
+        In the future support will be added for saving to other formats.
+
+        Parameters
+        ----------
+        filepath : string
+            Location to save file to.
+
+        filetype : string
+            'auto' or any supported file extension
+        """
+        #io.write_file(filepath, self.data, self.meta, filetype=filetype,
+        #              **kwargs)
+        pickle.dump( self, open( filepath, "wb" ), **kwargs )
+'''
 
 
 '''
