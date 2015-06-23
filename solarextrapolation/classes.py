@@ -3,6 +3,9 @@
 Created on Fri Jun 05 12:49:03 2015
 
 @author: Alex
+
+This module was developed with funding provided by ESA Summer of Code in Space
+(2015).
 """
 
 import sunpy.map
@@ -18,7 +21,7 @@ class Preprocessors(object):
     Usage can include basic filters for noise/contrast or algorythms to
     compensate for extrapolator assumptions, such as the force-free assumption
     that is assumed in many extrapolations, but isn't true in the photosphere
-    where magnetiogram observations are generally taken.
+    where magnetogram observations are generally taken.
     """
     def __init__(self, map_data, **kwargs):
         """Method for creating a preprocessor object, using a sunpy map.
@@ -60,7 +63,7 @@ class Preprocessors(object):
 class Extrapolators(object):
     """
     Common class for all 3D vector field extrapolation routines.
-    Each routine, created by building a subclass, will have wildly variging
+    Each routine, created by building a subclass, will have wildly varying
     capabilities and input arguments so this have been left intentionally
     minimal.
     The primary method to override is extrapolation(), the primary method to
@@ -87,7 +90,7 @@ class Extrapolators(object):
         # Add some type checking, we want a map object, check for .unit attribute.
         # Extrapolation code goes here.
         arr_4d = np.zeros([0, 0, 0, 0])
-        map_output = Map3D(( arr_4d, self.meta ))
+        map_output = Map3D( arr_4d, self.meta )
         
         return map_output
 
@@ -118,7 +121,6 @@ class AnalyticalModel(object):
         magnetogram = np.zeros([dim, dim])
         magnetogram_header  = {'ZNAXIS': 2, 'ZNAXIS1': dim, 'ZNAXIS2': dim}
         self.magnetogram = sunpy.map.Map((magnetogram, magnetogram_header))
-
 
     def generate(self):
         # Extrapolate the vector field and return.
@@ -171,12 +173,13 @@ class Map3D(object):
 
 
 
-
-
 from sunpy.util import expand_list
 
 
 class Map3DCube:
+    """
+    A basic data structure for holding a list of Map3D objects.
+    """
     def __init__(self, *args, **kwargs):
 
         # Hack to get around Python 2.x not backporting PEP 3102.
@@ -238,8 +241,6 @@ class Map3DComparer(object):
                     # If this is bigger then the current max value.
                     if output < component_sum:
                         output = component_sum
-
-
 
         # Output
         return output
