@@ -9,6 +9,16 @@ from classes import *
 import numpy as np
 
 class PotentialExtrapolator(Extrapolators):
+    '''
+    This is a greens function for extrapolating the potential (scalar) field
+    above a given magnetogram.
+    Exquations are from the following book:
+        Title:      Physics of the Solar Corona
+        Author:     T. J. M. Boyd and J. J. Sanderson
+        Publisher:  Springer Books and Praxis Publishing
+        ISBN:       978-3-540-30766-2
+    See chapter 5 on potential fields.
+    '''
     def __init__(self, map_magnetogram, **kwargs):
         super(PotentialExtrapolator, self).__init__(map_magnetogram, **kwargs)
         self.meta['extrapolator_routine'] = 'Potential Field Extrapolator'
@@ -21,7 +31,19 @@ class PotentialExtrapolator(Extrapolators):
         return Map3D( Bxyz, self.meta )
 
     # Greens function.
-    def _Gn_5_2_26(self, inR, inRPrime):    
+    def _Gn_5_2_26(self, inR, inRPrime):
+        '''
+        Continious Greens Function
+        Treats the magnetic field silimarly to the electrostatic potential and
+        uses the assumption that all magnetic potential is from the Sun below.
+        At any one point in space (:math:`\mathbf{r}`), we have a contribution 
+        from the point on the boundary map (:math:`\mathbf{r}^\prime`) given by:
+        .. math::
+        G_n(\mathbf{r}, \mathbf{r}^\prime) = \frac{1}{2\pi|\mathbf{r} - \mathbf{r}^\prime|}
+        Which can be used to find the total field at a point as a result of
+        integrating over the whole boundary:
+        
+        '''
         floModDr = np.linalg.norm(inR - inRPrime)
         floOut = 1.0 / ( 2.0 * np.pi * floModDr)
         return floOut
