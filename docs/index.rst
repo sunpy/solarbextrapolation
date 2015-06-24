@@ -10,4 +10,5 @@ this package is here:
   self
 
 .. automodapi:: solarextrapolation.classes
+.. automodapi:: solarextrapolation.potential_field_extrapolator
 

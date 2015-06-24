@@ -56,7 +56,7 @@ if __name__ == '__main__':
                 #a3DArray[i,j,k] = i * delta
     
     # Uncomment below to make it a random number volume again
-    #a3DArray = np.random.rand(5,5,5)
+    a3DArray = np.random.rand(5,5,5)
 
     # Print the scalar volume array
     print '\n\n'
@@ -68,6 +68,14 @@ if __name__ == '__main__':
     print a4DArray[2,2,2]
     
     # Print the centre cell vector from the numpy gradient function
-    b4DArray = np.gradient(a3DArray)
+    b4DArray = np.gradient(a3DArray,1)
+    print '[ ' + str(b4DArray[0][2,2,2]) + ', ' + str(b4DArray[1][2,2,2]) + ', ' + str(b4DArray[2][2,2,2]) + ']'
+    b4DArray = np.gradient(a3DArray,2)
+    print '[ ' + str(b4DArray[0][2,2,2]) + ', ' + str(b4DArray[1][2,2,2]) + ', ' + str(b4DArray[2][2,2,2]) + ']'
+    b4DArray = np.gradient(a3DArray,3)
+    print '[ ' + str(b4DArray[0][2,2,2]) + ', ' + str(b4DArray[1][2,2,2]) + ', ' + str(b4DArray[2][2,2,2]) + ']'
+    b4DArray = np.gradient(a3DArray,4)
+    print '[ ' + str(b4DArray[0][2,2,2]) + ', ' + str(b4DArray[1][2,2,2]) + ', ' + str(b4DArray[2][2,2,2]) + ']'
+    b4DArray = np.gradient(a3DArray,5)
     print '[ ' + str(b4DArray[0][2,2,2]) + ', ' + str(b4DArray[1][2,2,2]) + ', ' + str(b4DArray[2][2,2,2]) + ']'
     
