@@ -143,11 +143,18 @@ class Map3D(object):
     
     @property
     def is_scalar(self):
+        """
+        Returns true if data is a volume of scalar values (3D array) or false
+        if it is a volume of vector values (4D array).
+        """
         return (True if self.data.ndim is 3 else False)
 
 # #### I/O routines #### #
     @classmethod
     def load(self, filepath):
+        """
+        Load a Map3D instance using pickle.
+        """
         loaded = pickle.load( open( filepath, "rb" ) )
         return loaded
 
@@ -209,8 +216,27 @@ class Map3DCube:
 
 
 class Map3DComparer(object):
+    """
+    | Class for comparrison of vector fields.
+    | There are two classification of test:
+    | * **Mono**: returns a value for a given vector field. Can be normalized to
+    the benchmark field.
+    | * **Binary**: requires comparrison between two vector fields.
+    | By default:
+    | * Benchmark field is the first/original vector field. This is
+    used as the baseline for comparrison. This can be changed using the
+    benchmark=n kwarg.
+    | * Normalise will be set to false.
+    | Individual tests can be run and return results for imediate viewing
+    (using astropy.table).
+    | Likewise, compare_all can be used to run the whole series of tests.
+    | Note: all vector fields must be of the same shape.
+    """
     def __init__(self, map3D, *args, **kwargs):
-        self.maps = expand_list(args)
+        self.maps_list = map3D + expand_list(args)
+        self.benchmark = kwargs.get('benchmark', 0) # Defaults to the first vector field in the list
+        self.normalise = kwargs.get('normalise', False)
+        
 
         for m in self.maps:
             if not isinstance(m, Map3D):

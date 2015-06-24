@@ -9,7 +9,7 @@ from classes import *
 import numpy as np
 
 class PotentialExtrapolator(Extrapolators):
-    '''
+    """
     This is a greens function for extrapolating the potential (scalar) field
     above a given magnetogram.
     Exquations are from the following book:
@@ -18,13 +18,18 @@ class PotentialExtrapolator(Extrapolators):
         Publisher:  Springer Books and Praxis Publishing
         ISBN:       978-3-540-30766-2
     See chapter 5 on potential fields.
-    '''
+    """
     def __init__(self, map_magnetogram, **kwargs):
         super(PotentialExtrapolator, self).__init__(map_magnetogram, **kwargs)
         self.meta['extrapolator_routine'] = 'Potential Field Extrapolator'
 
     def _extrapolation(self):
-        # Adding in custom parameters to the meta
+        """
+        Override the primary execution method from the extrapolation class.
+        The process is to extrapolate the potential (scalar) field (phi) and
+        then use numerical differentiation (gradient) to find the vector field
+        (Bxyz).
+        """
         phi = self._extrapolate_phi()
         Bxyz = self._determine_vec(phi, D = 1, debug = False)
 
@@ -32,7 +37,7 @@ class PotentialExtrapolator(Extrapolators):
 
     # Greens function.
     def _Gn_5_2_26(self, inR, inRPrime):
-        '''
+        """
         Continious Greens Function
         Treats the magnetic field silimarly to the electrostatic potential and
         uses the assumption that all magnetic potential is from the Sun below.
@@ -43,7 +48,7 @@ class PotentialExtrapolator(Extrapolators):
         Which can be used to find the total field at a point as a result of
         integrating over the whole boundary:
         
-        '''
+        """
         floModDr = np.linalg.norm(inR - inRPrime)
         floOut = 1.0 / ( 2.0 * np.pi * floModDr)
         return floOut
@@ -97,12 +102,12 @@ class PotentialExtrapolator(Extrapolators):
         return D
     
     def _extrapolate_phi(self, debug=False):
-        '''
+        """
         A function to extrapolate the magnetic field above the given boundary.
         Assumes the input B-field boundary data is near normal (the image must
         be near the centre of the HMI data).
         P183 (5.2.28)
-        '''
+        """
         if debug:
             print 'extrapolatePhi(' + str(self.map_boundary_data.data.shape) + ', ' + str(inZ) + ', ' + str(debug) + ')'
         
@@ -115,10 +120,10 @@ class PotentialExtrapolator(Extrapolators):
 
 
     def _determine_vec(self, phi, D = 1, debug = False):        
-        '''
+        """
         Create an empty 3D matrix from the output.
         ATM, for simplicity, I make the same size as the potential field, though the outer 2 layers are all 0.0.
-        '''
+        """
         tupVolShape = phi.shape
         npmVecSpace = np.zeros((tupVolShape[0], tupVolShape[1], tupVolShape[2], 3)) # in Order XYZC (C = component directions)
         
