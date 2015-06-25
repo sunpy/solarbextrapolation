@@ -12,6 +12,7 @@ import sunpy.map
 import numpy as np
 import pickle
 import time
+from astropy.table import Table
 #import astropy.units as u
 
 class Preprocessors(object):
@@ -29,7 +30,8 @@ class Preprocessors(object):
         # Add some type checking, we want a map object, check for .unit attribute.
         self.map_input = map_data
         self.routine = kwargs.get('preprocessor_routine', type(self))
-        self.meta = { 'original_map_header': self.map_input.meta, 'preprocessor_routine': self.routine }
+        self.meta = self.map_input.meta
+        self.meta['preprocessor_routine'] = self.routine
         self.filepath = kwargs.get('filepath', None)
 
     def _preprocessor(self):
@@ -113,21 +115,30 @@ class Extrapolators(object):
 
 
 class AnalyticalModel(object):
+    """
+    Common class for the development of anylitical models of magnetic fields.
+    Use the models to evaluate the accuracy of an extrapolation routine with
+    the figures of merit.
+    """
     def __init__(self):
         dim = 16
+        # 
         header = {'ZNAXIS': 3, 'ZNAXIS1': dim, 'ZNAXIS2': dim, 'ZNAXIS3': dim}
         X, Y, Z = np.zeros([dim, dim, dim]), np.zeros([dim, dim, dim]), np.zeros([dim, dim, dim])
         self.field = Map3D(X, Y, Z, header)
+        
         magnetogram = np.zeros([dim, dim])
         magnetogram_header  = {'ZNAXIS': 2, 'ZNAXIS1': dim, 'ZNAXIS2': dim}
         self.magnetogram = sunpy.map.Map((magnetogram, magnetogram_header))
 
     def generate(self):
-        # Extrapolate the vector field and return.
+        """Vector the vector field and return."""
         return self.map
 
     def to_magnetogram(self):
-        # Extrapolate the vector field and return.
+        """
+        Calculate the LoS vector field as a sunpy map and return.
+        """
         return self.magnetogram
 
 
@@ -201,10 +212,11 @@ class Map3DCube:
                            'CompositeMap expects pre-constructed map objects.')
 
     def __getitem__(self, key):
-        """Overriding indexing operation.  If the key results in a single map,
+        """
+        Overriding indexing operation.  If the key results in a single map,
         then a map object is returned.  This allows functions like enumerate to
-        work.  Otherwise, a mapcube is returned."""
-
+        work.  Otherwise, a mapcube is returned.
+        """
         if isinstance(self.maps[key], Map3D):
             return self.maps[key]
         else:
@@ -213,6 +225,13 @@ class Map3DCube:
     def __len__(self):
         """Return the number of maps in a mapcube."""
         return len(self.maps)
+    
+    
+    def all_maps_same_shape(self):
+        """
+        Tests if all the 3D maps have the same shape.
+        """
+        return np.all([m.data.shape == self.maps[0].data.shape for m in self.maps])
 
 
 class Map3DComparer(object):
@@ -237,20 +256,28 @@ class Map3DComparer(object):
         self.benchmark = kwargs.get('benchmark', 0) # Defaults to the first vector field in the list
         self.normalise = kwargs.get('normalise', False)
         
+        # An empty table for the results:
+        N = len(self.maps_list)
+        t1, t2, t3, t4, t5, t6, t7 = [None] * N, [None] * N, [None] * N, [None] * N, [None] * N, [None] * N, [None] * N
+        self.results = Table([t1, t2, t3, t4, t5, t6, t7], names=('l-infinity norm', 'test 2', 'test 3', 'test 4', 'test 5', 'test 6', 'test 7'), meta={'name': 'Results Table'})
+        self.results_normalised = Table([t1, t2, t3, t4, t5, t6, t7], names=('l-infinity norm', 'test 2', 'test 3', 'test 4', 'test 5', 'test 6', 'test 7'), meta={'name': 'Results Table'})
 
         for m in self.maps:
             if not isinstance(m, Map3D):
                 raise ValueError(
                          'CompositeMap expects pre-constructed map3D objects.')
 
-        self.normalize_all = True
-        if kwargs.get('normalize'):
-            self.normalize = kwargs['normalize']
-        self.normalize_to = 0
-        if kwargs.get('normalize_to'):
-            self.normalize = kwargs['normalize_to']
 
     def L_infin_norm(map_field, benchmark):
+        """
+        l-infinity norm of the vector field.
+        For vector field :math:`\bfx` this would be:
+        \left \| \mathbf{x} \right \|_\infty = \sqrt[\infty]{\Sigma_i x_i^\infty} \approx \textup{max}(|x_i|)
+        (the malue of the maximum component)
+        
+        # From: https://rorasa.wordpress.com/2012/05/13/l0-norm-l1-norm-l2-norm-l-infinity-norm/
+        """
+        
         # Placeholder for the maximum value.
         output = - 10.0**15
 
@@ -268,7 +295,7 @@ class Map3DComparer(object):
                     if output < component_sum:
                         output = component_sum
 
-        # Output
+        # Output            
         return output
 
     def compare_all(self):
@@ -279,6 +306,11 @@ class Map3DComparer(object):
         for map3D in self.maps:
             arr_data = map3D.data
             result = self.L_infin_norm(arr_data)
+            
+        if self.normalise:
+            self.results_normalised
+        else:
+            self.results
 
 
 
@@ -307,7 +339,7 @@ if __name__ == '__main__':
             # Outputting the map.
             return map_output
 
-    aMap2D = sunpy.map.Map('C://Users//Alex//Dropbox//Study//2014-2015//SoCiS//Coding//Python//Random//data//hmi.m_720s.2015.05.01_00-12-00_TAI.magnetogram.fits')
+    aMap2D = sunpy.map.Map('C://git//solarextrapolation//solarextrapolation//data//example_data_(100x100)__01_hmi.fits')
     aPrePro = PreZeros(aMap2D.submap([0,10], [0,10]))
     aPreProData = aPrePro.preprocess()
     # aPreProData = aMap2D.submap([0,10], [0,10])
