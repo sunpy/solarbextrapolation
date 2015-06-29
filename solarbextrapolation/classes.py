@@ -193,7 +193,33 @@ class Map3D(object):
         if it is a volume of vector values (4D array).
         """
         return (True if self.data.ndim is 3 else False)
+    
+    @property
+    def xrange(self):
+        """Return the X range of the image in arcsec from edge to edge."""
+        # Original code from sunpy.map
+        #xmin = self.center['x'] - self.shape[1] / 2. * self.scale['x']
+        #xmax = self.center['x'] + self.shape[1] / 2. * self.scale['x']
+        
+        xmin, xmax = -20.0, +20.0
+        return [xmin, xmax]
 
+    @property
+    def yrange(self):
+        """Return the Y range of the image in arcsec from edge to edge."""
+        # Original code from sunpy.map
+        #ymin = self.center['y'] - self.shape[0] / 2. * self.scale['y']
+        #ymax = self.center['y'] + self.shape[0] / 2. * self.scale['y']
+
+        ymin, ymax = -20.0, +20.0
+        return [ymin, ymax]
+
+    @property
+    def yrange(self):
+        """Return the Z range of the image in arcsec from edge to edge."""
+        zmin, zmax = 0.0, +40.0
+        return [zmin, zmax]
+    
 # #### I/O routines #### #
     @classmethod
     def load(self, filepath):
