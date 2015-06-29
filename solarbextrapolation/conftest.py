@@ -14,12 +14,13 @@ matplotlib.use('Agg')
 ## Uncomment and customize the following lines to add/remove entries
 ## from the list of packages for which version numbers are displayed
 ## when running the tests
-# try:
-#     PYTEST_HEADER_MODULES['Astropy'] = 'astropy'
-#     PYTEST_HEADER_MODULES['scikit-image'] = 'skimage'
-#     del PYTEST_HEADER_MODULES['h5py']
-# except NameError:  # needed to support Astropy < 1.0
-#     pass
+try:
+    PYTEST_HEADER_MODULES['Astropy'] = 'astropy'
+    PYTEST_HEADER_MODULES['SunPy'] = 'sunpy'
+    PYTEST_HEADER_MODULES['mayavi'] = 'mayavi'
+    del PYTEST_HEADER_MODULES['h5py']
+except NameError:  # needed to support Astropy < 1.0
+    pass
 
 ## Uncomment the following lines to display the version number of the
 ## package rather than the version number of Astropy in the top line when
