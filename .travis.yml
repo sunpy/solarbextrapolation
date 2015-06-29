@@ -16,7 +16,7 @@ install:
     - conda config --set always_yes true
     - conda update conda
     - conda config --add channels sunpy --add channels astropy-ci-extras --add channels https://conda.binstar.org/sunpy/channel/citesting
-    - conda create -n testing python=$CONDAA_PY numpy=CONDA_NPY && source activate testing
+    - conda create -n testing python=$CONDA_PY numpy=CONDA_NPY && source activate testing
     - conda install sunpy mayavi
 
 script:
