@@ -7,7 +7,8 @@ env:
         - TARGET_ARCH="x64"
         - CONDA_INSTALL_LOCN="${HOME}/conda"
     matrix:
-        - CONDA_PY=27  CONDA_NPY=17
+        - CONDA_PY=27  CONDA_NPY=19
+        - CONDA_PY=34  CONDA_NPY=19
 
 install:
     - python ./Obvious-CI/bootstrap-obvious-ci-and-miniconda.py ${CONDA_INSTALL_LOCN} ${TARGET_ARCH} ${CONDA_PY::1} --without-obvci
