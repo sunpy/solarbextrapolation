@@ -21,4 +21,5 @@ install:
 script:
     - # Update the conda recipe's meta.yaml with an appropriate version.
     - python setup.py test
+    - echo "What?!"
 
