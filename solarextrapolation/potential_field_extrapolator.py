@@ -8,16 +8,18 @@ Created on Fri Jun 12 13:01:54 2015
 from classes import *
 import numpy as np
 
+__all__ = ['PotentialExtrapolator']
+
 class PotentialExtrapolator(Extrapolators):
     """
-    This is a greens function for extrapolating the potential (scalar) field
-    above a given magnetogram.
-    Exquations are from the following book:
-        Title:      Physics of the Solar Corona
-        Author:     T. J. M. Boyd and J. J. Sanderson
-        Publisher:  Springer Books and Praxis Publishing
-        ISBN:       978-3-540-30766-2
-    See chapter 5 on potential fields.
+    | This is a greens function for extrapolating the potential (scalar) field
+    | above a given magnetogram.
+    | Exquations are from the following book:
+    |     Title:      Physics of the Solar Corona
+    |     Author:     T. J. M. Boyd and J. J. Sanderson
+    |     Publisher:  Springer Books and Praxis Publishing
+    |     ISBN:       978-3-540-30766-2
+    | See chapter 5 on potential fields.
     """
     def __init__(self, map_magnetogram, **kwargs):
         super(PotentialExtrapolator, self).__init__(map_magnetogram, **kwargs)
@@ -33,7 +35,7 @@ class PotentialExtrapolator(Extrapolators):
         phi = self._extrapolate_phi()
         Bxyz = self._determine_vec(phi, D = 1, debug = False)
 
-        return Map3D( Bxyz, self.meta )
+        return Map3D(Bxyz, self.meta)
 
     # Greens function.
     def _Gn_5_2_26(self, inR, inRPrime):
@@ -50,7 +52,7 @@ class PotentialExtrapolator(Extrapolators):
         
         """
         floModDr = np.linalg.norm(inR - inRPrime)
-        floOut = 1.0 / ( 2.0 * np.pi * floModDr)
+        floOut = 1.0 / (2.0 * np.pi * floModDr)
         return floOut
     
     # Greens function.
@@ -58,10 +60,10 @@ class PotentialExtrapolator(Extrapolators):
         d_i = i - i_prime
         d_j = j - j_prime
         d_k = k - d_com # d / np.sqrt(2.0 * np.pi)
-        floModDr = np.sqrt( d_i * d_i + d_j * d_j + d_k * d_k)
+        floModDr = np.sqrt(d_i * d_i + d_j * d_j + d_k * d_k)
         
         #print 'floModDr: ' + str(floModDr)
-        floOut = 1.0 / ( 2.0 * np.pi * floModDr)
+        floOut = 1.0 / (2.0 * np.pi * floModDr)
         #print 'floOut: ' + str(floOut)
         return floOut
     
@@ -109,7 +111,7 @@ class PotentialExtrapolator(Extrapolators):
         P183 (5.2.28)
         """
         if debug:
-            print 'extrapolatePhi(' + str(self.map_boundary_data.data.shape) + ', ' + str(inZ) + ', ' + str(debug) + ')'
+            print "extrapolatePhi({},{},{})".format(self.map_boundary_data.data.shape, inZ, debug)
         
         # Parameters
         arr_boundary = self.map_boundary_data.data
