@@ -14,6 +14,7 @@ install:
     - source ${CONDA_INSTALL_LOCN}/bin/activate root
     - conda config --add channels sunpy --add channels astropy-ci-extras --add channels https://conda.binstar.org/sunpy/channel/citesting
     - conda create -n installed_python python=2.7 --yes && source activate installed_python
+    - conda install sunpy
 
 script:
     - # Update the conda recipe's meta.yaml with an appropriate version.
