@@ -12,6 +12,8 @@ env:
 install:
     - python ./Obvious-CI/bootstrap-obvious-ci-and-miniconda.py ${CONDA_INSTALL_LOCN} ${TARGET_ARCH} ${CONDA_PY::1} --without-obvci
     - source ${CONDA_INSTALL_LOCN}/bin/activate root
+    - conda config --set always_yes true
+    - conda update conda
     - conda config --add channels sunpy --add channels astropy-ci-extras --add channels https://conda.binstar.org/sunpy/channel/citesting
     - conda create -n installed_python python=2.7 --yes && source activate installed_python
     - conda install sunpy
