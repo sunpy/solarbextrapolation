@@ -11,6 +11,8 @@ import tempfile
 import numpy as np
 import os
 
+import sunpy.map
+
 from ..classes import *
 
 
@@ -72,14 +74,14 @@ def test_create_and_run_preprocessor_subclass():
         def _preprocessor(self):
             # Adding in custom parameters to the meta
             self.meta['preprocessor_routine'] = 'Zeros Preprocessor'
-            
+
             # Creating the trivial zeros map of teh shape of the input map
-            map_output = sunpy.map.Map((np.zeros(self.map_input.data.shape), 
+            map_output = sunpy.map.Map((np.zeros(self.map_input.data.shape),
                                         self.meta))
-            
+
             # Outputting the map.
             return map_output
-    
+
     # Instansiate the new child class
     aNumpyArray = np.zeros((2,2))
     aMetaDict = { 'file': 'test Map object'}
@@ -100,7 +102,7 @@ def test_create_and_run_extrapolator_subclass():
 
             arr_4d = np.zeros([self.map_boundary_data.data.shape[0], self.map_boundary_data.data.shape[0], self.z, 3])
             return Map3D( arr_4d, self.meta )
-    
+
     # Instansiate the new child class
     afilename = tempfile.NamedTemporaryFile(suffix='np').name
     aNumpyArray = np.zeros((2,2))
