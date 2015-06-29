@@ -4,6 +4,9 @@
 
 from astropy.tests.pytest_plugins import *
 
+import matplotlib
+matplotlib.use('Agg')
+
 ## Uncomment the following line to treat all DeprecationWarnings as
 ## exceptions
 # enable_deprecations_as_exceptions()
