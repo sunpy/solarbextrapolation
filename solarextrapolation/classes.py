@@ -12,8 +12,12 @@ import sunpy.map
 import numpy as np
 import pickle
 import time
+from datetime import datetime
+
 from astropy.table import Table
 #import astropy.units as u
+
+__all__ = ['Preprocessors', 'Extrapolators', 'Map3D', 'Map3DCube']
 
 class Preprocessors(object):
     """
@@ -23,14 +27,26 @@ class Preprocessors(object):
     compensate for extrapolator assumptions, such as the force-free assumption
     that is assumed in many extrapolations, but isn't true in the photosphere
     where magnetogram observations are generally taken.
+    
+    Parameters
+    ----------
+    
+    map_data : `sunpy.map.GenericMap`
+        The sunpy map containing the data to be processed.
+    filepath : `string`
+        The optional filepath for automatic saving of preprocessed results.
+    notes : `string`
+        User specified notes that will be added to the metadata.
     """
     def __init__(self, map_data, **kwargs):
-        """Method for creating a preprocessor object, using a sunpy map.
+        """
+        Method for creating a preprocessor object, using a sunpy map.
         """
         # Add some type checking, we want a map object, check for .unit attribute.
         self.map_input = map_data
         self.routine = kwargs.get('preprocessor_routine', type(self))
         self.meta = self.map_input.meta
+        self.meta['preprocessor_notes'] = kwargs.get('notes', '')
         self.meta['preprocessor_routine'] = self.routine
         self.filepath = kwargs.get('filepath', None)
 
@@ -49,11 +65,12 @@ class Preprocessors(object):
         Method to be called to run the preprocessor.
         Times the process and saves output where applicable.
         """
+        dt_start = datetime.now()
         tim_start = time.time()
         map_output = self._preprocessor()
         tim_duration = time.time() - tim_start
 
-        map_output.meta['preprocessor_start_time'] = tim_start
+        map_output.meta['preprocessor_start_time'] = dt_start.isoformat()
         map_output.meta['preprocessor_duration'] = tim_duration
 
         if self.filepath:
@@ -71,13 +88,27 @@ class Extrapolators(object):
     The primary method to override is extrapolation(), the primary method to
     call is extrapolate() which will both call extrapolation() and save the
     result if a filepath argument is given.
+    
+    Parameters
+    ----------
+    
+    map_magnetogram : `sunpy.map.GenericMap`
+        The sunpy map containing the boundary magnetogram data.
+    filepath : `string`
+        The optional filepath for automatic saving of extrapolation results.
+    z : `int`
+        The vertical grid size.
+    notes : `string`
+        User specified notes that will be added to the metadata.
     """
 
     def __init__(self, map_magnetogram, **kwargs):
-        """Construct an extrapolator using the given 2D map.
+        """
+        Construct an extrapolator using the given 2D map.
         """
         self.map_boundary_data = map_magnetogram
         self.meta = { 'boundary_1_meta': self.map_boundary_data.meta }
+        self.meta['extrapolator_notes'] = kwargs.get('notes', '')
         self.z = kwargs.get('z', 10)
         self.filepath = kwargs.get('filepath', None)
         self.routine = kwargs.get('extrapolator_routine', type(self))
@@ -101,11 +132,12 @@ class Extrapolators(object):
         Method to be called to run the extrapolation.
         Times and saves the extrapolation where applicable.
         """
+        dt_start = datetime.now()
         tim_start = time.time()
         arr_output = self._extrapolation()
         tim_duration = time.time() - tim_start
 
-        arr_output.meta['extrapolator_start_time'] = tim_start
+        arr_output.meta['extrapolator_start_time'] = dt_start.isoformat()
         arr_output.meta['extrapolator_duration'] = tim_duration
 
         if self.filepath:
@@ -132,7 +164,9 @@ class AnalyticalModel(object):
         self.magnetogram = sunpy.map.Map((magnetogram, magnetogram_header))
 
     def generate(self):
-        """Vector the vector field and return."""
+        """
+        Calculate the vector field and return.
+        """
         return self.map
 
     def to_magnetogram(self):
@@ -170,7 +204,8 @@ class Map3D(object):
         return loaded
 
     def save(self, filepath, filetype='auto', **kwargs):
-        """Saves the Map3D object to a file.
+        """
+        Saves the Map3D object to a file.
 
         Currently uses Python pickle.
         https://docs.python.org/2/library/pickle.html
@@ -186,7 +221,7 @@ class Map3D(object):
         """
         #io.write_file(filepath, self.data, self.meta, filetype=filetype,
         #              **kwargs)
-        pickle.dump( self, open( filepath, "wb" ), **kwargs )
+        pickle.dump(self, open( filepath, "wb" ), **kwargs)
 
 
 
@@ -223,7 +258,9 @@ class Map3DCube:
             return Map3DCube(self.maps[key])
 
     def __len__(self):
-        """Return the number of maps in a mapcube."""
+        """
+        Return the number of maps in a mapcube.
+        """
         return len(self.maps)
     
     
