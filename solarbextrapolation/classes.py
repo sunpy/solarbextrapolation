@@ -13,6 +13,7 @@ import numpy as np
 import pickle
 import time
 from datetime import datetime
+from astropy import units as u
 
 from astropy.table import Table
 #import astropy.units as u
@@ -109,10 +110,17 @@ class Extrapolators(object):
         self.map_boundary_data = map_magnetogram
         self.meta = { 'boundary_1_meta': self.map_boundary_data.meta }
         self.meta['extrapolator_notes'] = kwargs.get('notes', '')
-        self.z = kwargs.get('z', 10)
+        self.z = kwargs.get('z', 1)
         self.filepath = kwargs.get('filepath', None)
         self.routine = kwargs.get('extrapolator_routine', type(self))
-        self.meta = { 'original_map_header': self.map_boundary_data.meta, 'extrapolator_routine': self.routine }
+
+    def _angle_to_length(self, arc):
+        """
+        Approximate a length on the surface from the arc length.
+        Uses the small angle approximation.
+        """
+        length = ((self.map_boundary_data.dsun - self.map_boundary_data.rsun_meters) * self.map_boundary_data.xrange.to(u.radian))
+        return length.to(u.m, equivalencies=u.dimensionless_angles())
 
     def _extrapolation(self):
         """
@@ -122,8 +130,14 @@ class Extrapolators(object):
         """
         # Add some type checking, we want a map object, check for .unit attribute.
         # Extrapolation code goes here.
-        arr_4d = np.zeros([0, 0, 0, 0])
-        map_output = Map3D( arr_4d, self.meta )
+        arr_4d = np.zeros([self.map_boundary_data.data.shape[0], self.map_boundary_data.data.shape[1], 1, 3])
+        
+        # Calculate the ranges in each dimension in length units (meters)
+        x_range = self._angle_to_length(self.map_boundary_data.xrange)
+        y_range = self._angle_to_length(self.map_boundary_data.yrange)
+        z_range = y_range#_angle_to_length(self.map_boundary_data.xrange)
+        
+        map_output = Map3D( arr_4d, self.meta, xrange=x_range, yrange=y_range, zrange=z_range )
         
         return map_output
 
@@ -181,10 +195,41 @@ class Map3D(object):
     A basic data structure for holding a 3D numpy array of floats or 3-float
     vectors and metadata.
     The structure can be saved/loaded (using pickle ATM).
+    
+    Parameters
+    ----------
+    
+    data : `numpy.array`
+        The numpy array containing the numerical data.
+    meta : `dictionary`
+        The container for additional information about the data in this object.
+        Where:
+        * x/y/zrange: the max/min spacial positions along the given axis.
+        * cdelt1/2/3: the size of each pixel in each axis.
+        * unit1/2/3: the spacial units in each axis.
+        * naxis1/2/3: the number of pixels in each axis.
     """
     def __init__(self, data, meta, **kwargs):
         self.data = data
         self.meta = meta
+        self.xrange = kwargs.get('xrange', [ 0, data.shape[0] ] * u.pixel)
+        self.yrange = kwargs.get('yrange', [ 0, data.shape[1] ] * u.pixel)
+        self.zrange = kwargs.get('zrange', [ 0, data.shape[2] ] * u.pixel)
+        
+        # Add some general properties to the metadata dictionary
+        self.meta['xrange'] = self.xrange
+        self.meta['yrange'] = self.yrange
+        self.meta['zrange'] = self.zrange
+        self.meta['cdelt1'] = ((self.xrange[1] - self.xrange[0]) / self.data.shape[0]).value
+        self.meta['cdelt2'] = ((self.yrange[1] - self.yrange[0]) / self.data.shape[1]).value
+        self.meta['cdelt3'] = ((self.zrange[1] - self.zrange[0]) / self.data.shape[2]).value
+        self.meta['unit1'] = self.xrange.unit
+        self.meta['unit2'] = self.yrange.unit
+        self.meta['unit3'] = self.zrange.unit
+        self.meta['naxis1'] = self.data.shape[0]
+        self.meta['naxis2'] = self.data.shape[1]
+        self.meta['naxis3'] = self.data.shape[2]
+
     
     @property
     def is_scalar(self):
@@ -195,30 +240,35 @@ class Map3D(object):
         return (True if self.data.ndim is 3 else False)
     
     @property
-    def xrange(self):
-        """Return the X range of the image in arcsec from edge to edge."""
-        # Original code from sunpy.map
-        #xmin = self.center['x'] - self.shape[1] / 2. * self.scale['x']
-        #xmax = self.center['x'] + self.shape[1] / 2. * self.scale['x']
+    def units(self):
+        """Image coordinate units along the x, y and z axes (cunit1/2/3)."""
+
+        # Define a triple, a named tuple object for returning values
+        from collections import namedtuple
+        Triple = namedtuple('Pair', 'x y z')
+
+        return Triple(u.Unit(self.meta.get('cunit1', 'pix')),
+                      u.Unit(self.meta.get('cunit2', 'pix')),
+                      u.Unit(self.meta.get('cunit3', 'pix')))
+    
+    @property
+    def scale(self):
+        """
+        Image scale along the x, y and z axes in units/pixel (cdelt1/2/3)
+        """
+        # Define a triple, a named tuple object for returning values
+        from collections import namedtuple
+        Triple = namedtuple('Pair', 'x y z')
         
-        xmin, xmax = -20.0, +20.0
-        return [xmin, xmax]
-
-    @property
-    def yrange(self):
-        """Return the Y range of the image in arcsec from edge to edge."""
-        # Original code from sunpy.map
-        #ymin = self.center['y'] - self.shape[0] / 2. * self.scale['y']
-        #ymax = self.center['y'] + self.shape[0] / 2. * self.scale['y']
-
-        ymin, ymax = -20.0, +20.0
-        return [ymin, ymax]
-
-    @property
-    def yrange(self):
-        """Return the Z range of the image in arcsec from edge to edge."""
-        zmin, zmax = 0.0, +40.0
-        return [zmin, zmax]
+        '''
+        return Triple(u.Unit(self.meta.get('cdelt1', 'arcsec')),
+                      u.Unit(self.meta.get('cdelt1', 'arcsec')),
+                      u.Unit(self.meta.get('cdelt2', 'arcsec')))
+        '''
+        return Triple(self.meta.get('cdelt1', 1.) * self.units.x / u.pixel,
+                      self.meta.get('cdelt2', 1.) * self.units.y / u.pixel,
+                      self.meta.get('cdelt3', 1.) * self.units.z / u.pixel)
+        
     
 # #### I/O routines #### #
     @classmethod
