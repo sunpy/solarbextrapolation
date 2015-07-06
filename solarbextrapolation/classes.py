@@ -14,6 +14,13 @@ import pickle
 import time
 from datetime import datetime
 from astropy import units as u
+#from sunpy.sun._constants import physical_constants as con
+
+from sunpy.sun import constants
+from sunpy.sun import sun
+from sunpy.time import parse_time, is_time
+import warnings
+import inspect
 
 from astropy.table import Table
 #import astropy.units as u
@@ -113,6 +120,8 @@ class Extrapolators(object):
         self.z = kwargs.get('z', 1)
         self.filepath = kwargs.get('filepath', None)
         self.routine = kwargs.get('extrapolator_routine', type(self))
+        self.xobsrange = self.map_boundary_data.xrange
+        self.yobsrange = self.map_boundary_data.yrange
 
     def _angle_to_length(self, arc):
         """
@@ -137,7 +146,7 @@ class Extrapolators(object):
         y_range = self._angle_to_length(self.map_boundary_data.yrange)
         z_range = y_range#_angle_to_length(self.map_boundary_data.xrange)
         
-        map_output = Map3D( arr_4d, self.meta, xrange=x_range, yrange=y_range, zrange=z_range )
+        map_output = Map3D( arr_4d, self.meta, xrange=x_range, yrange=y_range, zrange=z_range, xobsrange=self.xobsrange, yobsrange=self.yobsrange )
         
         return map_output
 
@@ -205,6 +214,7 @@ class Map3D(object):
         The container for additional information about the data in this object.
         Where:
         * x/y/zrange: the max/min spacial positions along the given axis.
+        * x/yobsrange: the observational data range.
         * cdelt1/2/3: the size of each pixel in each axis.
         * unit1/2/3: the spacial units in each axis.
         * naxis1/2/3: the number of pixels in each axis.
@@ -215,6 +225,8 @@ class Map3D(object):
         self.xrange = kwargs.get('xrange', [ 0, data.shape[0] ] * u.pixel)
         self.yrange = kwargs.get('yrange', [ 0, data.shape[1] ] * u.pixel)
         self.zrange = kwargs.get('zrange', [ 0, data.shape[2] ] * u.pixel)
+        self.xobsrange = kwargs.get('xobsrange', self.xrange)
+        self.yobsrange = kwargs.get('yobsrange', self.yrange)
         
         # Add some general properties to the metadata dictionary
         self.meta['xrange'] = self.xrange
@@ -229,6 +241,15 @@ class Map3D(object):
         self.meta['naxis1'] = self.data.shape[0]
         self.meta['naxis2'] = self.data.shape[1]
         self.meta['naxis3'] = self.data.shape[2]
+        if kwargs.get('date_obs', False):
+            self.meta['date-obs'] = kwargs.get('date_obs')
+        self.meta['rsun_ref'] = kwargs.get('rsun_ref', constants.radius.value)
+        if kwargs.get('dsun_obs', False):
+            self.meta['dsun_obs'] = kwargs.get('dsun_obs')
+
+        # For alignment with the boundary data
+        self.meta['xobsrange'] = self.xobsrange
+        self.meta['yobsrange'] = self.yobsrange
 
     
     @property
@@ -241,7 +262,9 @@ class Map3D(object):
     
     @property
     def units(self):
-        """Image coordinate units along the x, y and z axes (cunit1/2/3)."""
+        """
+        Image coordinate units along the x, y and z axes (cunit1/2/3).
+        """
 
         # Define a triple, a named tuple object for returning values
         from collections import namedtuple
@@ -268,8 +291,35 @@ class Map3D(object):
         return Triple(self.meta.get('cdelt1', 1.) * self.units.x / u.pixel,
                       self.meta.get('cdelt2', 1.) * self.units.y / u.pixel,
                       self.meta.get('cdelt3', 1.) * self.units.z / u.pixel)
-        
     
+    @property
+    def rsun_meters(self):
+        """Radius of the sun in meters"""
+        return u.Quantity(self.meta.get('rsun_ref', constants.radius), 'meter')
+
+    @property
+    def date(self):
+        """Image observation time"""
+        time = parse_time(self.meta.get('date-obs', 'now'))
+        #if time is None:
+        #    warnings.warn_explicit("Missing metadata for observation time. Using current time.",
+        #                               Warning, __file__, inspect.currentframe().f_back.f_lineno)
+        return parse_time(time)
+
+    @property
+    def dsun(self):
+        """
+        The observer distance from the Sun.
+        """
+        dsun = self.meta.get('dsun_obs', None)
+
+        if dsun is None:
+        #    warnings.warn_explicit("Missing metadata for Sun-spacecraft separation: assuming Sun-Earth distance",
+        #                           Warning, __file__, inspect.currentframe().f_back.f_lineno)
+            dsun = sun.sunearth_distance(self.date).to(u.m)
+
+        return u.Quantity(dsun, 'm')
+        
 # #### I/O routines #### #
     @classmethod
     def load(self, filepath):
@@ -445,7 +495,7 @@ if __name__ == '__main__':
             # Adding in custom parameters to the meta
             self.meta['preprocessor_routine'] = 'Zeros Preprocessor'
             
-            # Creating the trivial zeros map of teh shape of the input map
+            # Creating the trivial zeros map of the shape of the input map
             map_output = sunpy.map.Map((np.zeros(self.map_input.data.shape), 
                                         self.meta))
             
