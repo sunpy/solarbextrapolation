@@ -30,45 +30,72 @@ def visualise(aMap3D, **kwargs):
     np_seeds = kwargs.get('seeds', None)
     boundary = kwargs.get('boundary', None)
     
+    mayavi_unit_length = kwargs.get('unit_length', 1.0 * u.Mm)
+    units_boundary = kwargs.get('boundary_units', mayavi_unit_length)
+    units_volume = kwargs.get('volume_units', mayavi_unit_length)
+    show_boundary_axes = kwargs.get('show_boundary_axes', True)
+    show_volume_axes = kwargs.get('show_volume_axes', True)
+    
+    # Setup the equivilence
+    obs_distance = aMap3D.dsun - aMap3D.rsun_meters
+    radian_length = [ (u.radian, u.meter, lambda x: obs_distance * x, lambda x: x / obs_distance) ]
+    
     # Slice (scale) the fields make the vectors usable in mayavi.
     int_slice_scale = 1
     npm_3d_sliced   = aMap3D.data[::int_slice_scale,::int_slice_scale,::int_slice_scale,:]
     
     # Plot the main vector field (volume).
     fig = mlab.figure()
-
-    # Scale from astronomical units to something more usable with mayavi
-    mayavi_scale = 1#10**(-6)
-
+    
     # Make 3D coords for ever point in the 3D grid.
-    X, Y, Z = np.mgrid[aMap3D.xrange[0]*mayavi_scale:aMap3D.xrange[1]*mayavi_scale:npm_3d_sliced.shape[0]*1j,
-                       aMap3D.yrange[0]*mayavi_scale:aMap3D.yrange[1]*mayavi_scale:npm_3d_sliced.shape[1]*1j,
-                       aMap3D.zrange[0]*mayavi_scale:aMap3D.zrange[1]*mayavi_scale:npm_3d_sliced.shape[2]*1j]
+    x_range = aMap3D.xobsrange.to(u.meter, equivalencies=radian_length)
+    y_range = aMap3D.yobsrange.to(u.meter, equivalencies=radian_length)
+    z_range = aMap3D.zrange.to(u.meter, equivalencies=radian_length)
+    x_range_scaled = (x_range/mayavi_unit_length).decompose().value
+    y_range_scaled = (y_range/mayavi_unit_length).decompose().value
+    z_range_scaled = (z_range/mayavi_unit_length).decompose().value
+    print '\n\n' + str(aMap3D.xrange) + '\n' + str(aMap3D.xrange)
+    print str(x_range_scaled) + '\n' + str(x_range_scaled) + '\n\n'
+    X, Y, Z = np.mgrid[x_range_scaled[0]:x_range_scaled[1]:npm_3d_sliced.shape[0]*1j,
+                       y_range_scaled[0]:y_range_scaled[1]:npm_3d_sliced.shape[1]*1j,
+                       z_range_scaled[0]:z_range_scaled[1]:npm_3d_sliced.shape[2]*1j]
     vec_field = vector_field(X, Y, Z, npm_3d_sliced[:,:,:,0], npm_3d_sliced[:,:,:,1], npm_3d_sliced[:,:,:,2],
                              name='Magnetic Vector Field', figure=fig)
     vec_field_mag = mlab.pipeline.extract_vector_norm(vec_field, name="Magnetic Field Magnitude")
     
+    
     # Place a small outline around the data cube
     mlab.outline()
-    axes = mlab.axes()
+    
+    if show_volume_axes:
+        # Label axes
+        axes = mlab.axes()
+        x_range_scaled = (x_range/units_volume).decompose()
+        y_range_scaled = (y_range/units_volume).decompose()
+        z_range_scaled = (z_range/units_volume).decompose()
+        axes.axes.ranges = np.array([ x_range_scaled[0],  x_range_scaled[1],  y_range_scaled[0],  y_range_scaled[1],  z_range_scaled[0],  z_range_scaled[1]])
+        str_units = ' (' + str(units_volume) + ')'
+        axes.axes.x_label = 'Solar X ' + str_units
+        axes.axes.y_label = 'Solar Y' + str_units
+        axes.axes.z_label = 'Z' + str_units
     
     # Plot streamlines
     if np_seeds is None:
         tupSeedGrid = (4, 4) # (x, y) divisions, if a file isn't declared.
         # Avoid placing seeds in ghost cells
-        intSeedZ = 20# * mayavi_scale
+        intSeedZ = 3
         tupCentrePixel = [ int(aMap3D.data.shape[0] / 2.0), int(aMap3D.data.shape[0] / 2.0)]
         while math.isnan(aMap3D.data[tupCentrePixel[0],tupCentrePixel[1],intSeedZ, 0]):
             intSeedZ += 1
             print 'intSeedZ: ' + str(intSeedZ)
-        floZ = intSeedZ# * mayavi_scale
+        floZ = intSeedZ
         
-        intIncX = ((aMap3D.xrange[1] * 1.0 - aMap3D.xrange[0]) / (tupSeedGrid[1] + 1.0)) * mayavi_scale
-        intIncY = ((aMap3D.zrange[1] * 1.0 - aMap3D.zrange[0]) / (tupSeedGrid[0] + 1.0)) * mayavi_scale
+        intIncX = ((aMap3D.xrange[1] * 1.0 - aMap3D.xrange[0]) / (tupSeedGrid[1] + 1.0))
+        intIncY = ((aMap3D.zrange[1] * 1.0 - aMap3D.zrange[0]) / (tupSeedGrid[0] + 1.0))
         lisSeeds = []
         for i in range(1, tupSeedGrid[0] + 1):
             for j in range(1, tupSeedGrid[1] + 1):
-                lisSeed = [ i * intIncX + aMap3D.xrange[0] * mayavi_scale, j * intIncY + aMap3D.yrange[0] * mayavi_scale, floZ ]
+                lisSeed = [ i * intIncX + aMap3D.xrange[0], j * intIncY + aMap3D.yrange[0], floZ ]
                 lisSeeds.append(lisSeed)
                 print lisSeed
         np_seeds = np.array(lisSeeds)
@@ -76,7 +103,7 @@ def visualise(aMap3D, **kwargs):
     # Plot the seed points
     points = mlab.points3d(np_seeds[:,0], np_seeds[:,1], np_seeds[:,2])
     # Make the points smaller
-    points.glyph.glyph.scale_factor = mayavi_scale
+    points.glyph.glyph.scale_factor = 1.0 #mayavi_scale
     # Make the points blue
     points.actor.property.color = (0.2,0,1)
     # Create the custom streamline object
@@ -90,12 +117,20 @@ def visualise(aMap3D, **kwargs):
     # Make the lines colour coordinated
     slines.module_manager.scalar_lut_manager.lut_mode = 'winter'    
     slines.stream_tracer.integration_direction = 'both'
-
-
+    
+    
+    # Add the boundary data 2D map
     if boundary:
-        # CReate explicit points in 3D space
-        X, Y = np.mgrid[aMap2D.xrange[0]*mayavi_scale:aMap2D.xrange[1]*mayavi_scale:aMap2D.data.shape[0]*1j,
-                        aMap2D.yrange[0]*mayavi_scale:aMap2D.yrange[1]*mayavi_scale:aMap2D.data.shape[1]*1j]
+        x_range = boundary.xrange.to(u.meter, equivalencies=radian_length)
+        y_range = boundary.yrange.to(u.meter, equivalencies=radian_length)
+        x_range_scaled = (x_range/mayavi_unit_length).decompose().value
+        y_range_scaled = (y_range/mayavi_unit_length).decompose().value
+        #x_range_scaled = boundary.xrange.to(x_range/mayavi_unit_length, equivalencies=radian_length).decompose().value
+        #y_range_scaled = boundary.yrange.to(y_range/mayavi_unit_length, equivalencies=radian_length).decompose().value
+        print '\n\n' + str(aMap2D.xrange) + '\n' + str(mayavi_unit_length) + '\n\n'
+        # Create explicit points in 3D space
+        X, Y = np.mgrid[x_range_scaled[0]:x_range_scaled[1]:aMap2D.data.shape[0]*1j,
+                        y_range_scaled[0]:y_range_scaled[1]:aMap2D.data.shape[1]*1j]
         # Plot and add to the current figure
         img_boundary = mlab.pipeline.array2d_source(X, Y, aMap2D.data, figure=fig)
         img_boundary = mlab.pipeline.image_actor(img_boundary, figure = fig)
@@ -107,19 +142,86 @@ def visualise(aMap3D, **kwargs):
         # Legend details
         img_boundary.module_manager.scalar_lut_manager.show_legend = True #module_manager2.scalar_lut_manager.show_legend = True
         img_boundary.module_manager.scalar_lut_manager.scalar_bar_representation.position = np.array([ 0.1,  0.1 ])
-    
-    
+
+        # Place a small outline around the data cube
+        mlab.outline()
+        
+        if show_boundary_axes:
+            axes = mlab.axes()
+            x_range_scaled = (x_range/units_boundary).decompose().value
+            y_range_scaled = (y_range/units_boundary).decompose().value
+            axes.axes.ranges = np.array([ x_range_scaled[0],  x_range_scaled[1],  y_range_scaled[0],  y_range_scaled[1],  0,  0])
+            str_units = ' (' + str(units_boundary) + ')'
+            axes.axes.x_label = 'Solar X ' + str_units
+            axes.axes.y_label = 'Solar Y' + str_units
     # And open mayavi
     mlab.show()
 
+def scaled_length(length, scale_length, map):
+    if length.unit.is_equivalent(u.radian):
+        #print '\nscaled_length(' + str(length) + ', ' + str(scale_length) + ', map)'
+        distance = (map.dsun - map.rsun_meters)
+        #print 'distance: ' + str(distance)
+        length = (distance * length.to(u.radian)).to(u.m, equivalencies=u.dimensionless_angles())
+        #print 'length: ' + str(length)
+        #print 'output: ' + str((length / scale_length).decompose().value)
+    return (length / scale_length).decompose().value
+
+
+def angle_to_length(map, arc):
+    """
+    Approximate a length on the surface from the arc length.
+    Uses the small angle approximation.
+    """    
+    length = ((map.dsun - map.rsun_meters) * arc.to(u.radian))
+    return length.to(u.m, equivalencies=u.dimensionless_angles())
+
+
 if __name__ == '__main__':
+    # 2D boundary map
+    aMap2D = mp.Map('C:/fits/2011-02-14__20-35-25__01_hmi.fits').submap([-10,10] * u.arcsec, [-10,10] * u.arcsec)
+    aMap2D_cropped = aMap2D.submap([-8,8] * u.arcsec, [-8,8] * u.arcsec)
+    
+    # Using the dimensions of the boundary data to get the volume size
+    dim = [ aMap2D_cropped.data.shape[0], aMap2D_cropped.data.shape[1] ]
+    
+    # Observational ranges are from the boundary data
+    x_obs_range = aMap2D_cropped.xrange
+    y_obs_range = aMap2D_cropped.yrange
+    
+    # Getting the ranges. x/y from the boundary, z is defined manually.    
+    scale_length = 1.0 * u.Mm
+    x_range = scaled_length(x_obs_range, scale_length, aMap2D_cropped) * scale_length.unit
+    y_range = scaled_length(y_obs_range, scale_length, aMap2D_cropped) * scale_length.unit
+    z_range = [0.0, 10.0] * u.Mm
+
     # Vector field as a 3D map
-    a4DArray = np.random.rand(10,10,10,3)
+    a4DArray = np.random.rand(dim[0],dim[1],dim[0],3)
+    aMetaDict = { 'file': 'test SunPy Map object'}
+    aMap3D = Map3D(a4DArray, aMetaDict, xrange=x_range, yrange=y_range, zrange=z_range, xobsrange=x_obs_range, yobsrange=y_obs_range)
+    
+    visualise(aMap3D, boundary=aMap2D, seeds=np.array([[5,5,3]]), scale=1.0*u.Mm, boundary_units=1*u.arcsec, show_volume_axes=False)
+    
+    """
+    # Vector field as a 3D map
+    a4DArray = np.random.rand(dim[0],dim[1],dim[0],3)
+    '''
     for x in range(0,10):
         for y in range(0,10):
             a4DArray[x,y,0,0] = float('nan')
-    aMetaDict = { 'file': 'test SunPy Map object'}
-    aMap3D = Map3D(a4DArray, aMetaDict)
+    '''
+    
+    
+    
+
+    
+    x_range=[0.0, 20.0]*u.Mm
+    y_range=[0.0, 20.0]*u.Mm
+    z_range=[0.0, 20.0]*u.Mm
+    x_obs_range = [-15,-15] * u.arcsec
+
+    aMap3D = Map3D(a4DArray, aMetaDict, xrange=x_range, yrange=y_range, zrange=z_range)
+    #aMap3D = Map3D(a4DArray, aMetaDict)
     # Note: consider scipy.interpolate.griddata for 3D subsampling
     
     # Boundary data as a sunpy map
@@ -128,5 +230,6 @@ if __name__ == '__main__':
     aMap2D = mp.Map('C:/fits/2011-02-14__20-35-25__01_hmi.fits').submap([-22,22] * u.arcsec, [-22,22] * u.arcsec)
     
     # Plotthe lot
-    #visualise(aMap3D, boundary=aMap2D, seeds=np.array([[0,0,1]]))
-    visualise(aMap3D, boundary=aMap2D)
+    visualise(aMap3D, boundary=aMap2D, seeds=np.array([[5,5,3]]), scale=1000*u.kilometer, boundaryscale=1*u.arcsec)
+    #visualise(aMap3D, boundary=aMap2D)
+    """

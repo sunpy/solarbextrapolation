@@ -10,6 +10,7 @@ import tempfile
 
 import numpy as np
 import os
+from astropy import units as u
 
 import sunpy.map
 
@@ -86,7 +87,7 @@ def test_create_and_run_preprocessor_subclass():
     aNumpyArray = np.zeros((2,2))
     aMetaDict = { 'file': 'test Map object'}
     aMap2D = sunpy.map.Map(aNumpyArray, aMetaDict)
-    aPrePro = PreZeros(aMap2D.submap([0,10], [0,10]))
+    aPrePro = PreZeros(aMap2D.submap([0,10]*u.arcsec, [0,10]*u.arcsec))
     aPreProData = aPrePro.preprocess()
 
 
