@@ -235,9 +235,10 @@ class Map3D(object):
         self.meta['cdelt1'] = ((self.xrange[1] - self.xrange[0]) / self.data.shape[0]).value
         self.meta['cdelt2'] = ((self.yrange[1] - self.yrange[0]) / self.data.shape[1]).value
         self.meta['cdelt3'] = ((self.zrange[1] - self.zrange[0]) / self.data.shape[2]).value
-        self.meta['unit1'] = self.xrange.unit
-        self.meta['unit2'] = self.yrange.unit
-        self.meta['unit3'] = self.zrange.unit
+        # Note: should be reversed to fortran array indexing
+        self.meta['cunit1'] = self.xrange.unit
+        self.meta['cunit2'] = self.yrange.unit
+        self.meta['cunit3'] = self.zrange.unit
         self.meta['naxis1'] = self.data.shape[0]
         self.meta['naxis2'] = self.data.shape[1]
         self.meta['naxis3'] = self.data.shape[2]
@@ -301,9 +302,8 @@ class Map3D(object):
     def date(self):
         """Image observation time"""
         time = parse_time(self.meta.get('date-obs', 'now'))
-        #if time is None:
-        #    warnings.warn_explicit("Missing metadata for observation time. Using current time.",
-        #                               Warning, __file__, inspect.currentframe().f_back.f_lineno)
+        if time is None:
+            warnings.warn("Missing metadata for observation time. Using current time.",                               Warning)
         return parse_time(time)
 
     @property
@@ -314,8 +314,8 @@ class Map3D(object):
         dsun = self.meta.get('dsun_obs', None)
 
         if dsun is None:
-        #    warnings.warn_explicit("Missing metadata for Sun-spacecraft separation: assuming Sun-Earth distance",
-        #                           Warning, __file__, inspect.currentframe().f_back.f_lineno)
+            warnings.warn("Missing metadata for Sun-spacecraft separation: assuming Sun-Earth distance",
+                                   Warning)
             dsun = sun.sunearth_distance(self.date).to(u.m)
 
         return u.Quantity(dsun, 'm')
