@@ -122,8 +122,10 @@ def visualise(aMap3D, **kwargs):
     # Add the boundary data 2D map
     if boundary:
         x_range = boundary.xrange.to(u.meter, equivalencies=radian_length)
+        print '\nboundary: x_range: ' + str(x_range)
         y_range = boundary.yrange.to(u.meter, equivalencies=radian_length)
         x_range_scaled = (x_range/mayavi_unit_length).decompose().value
+        print '\nboundary: x_range_scaled: ' + str(x_range_scaled)
         y_range_scaled = (y_range/mayavi_unit_length).decompose().value
         #x_range_scaled = boundary.xrange.to(x_range/mayavi_unit_length, equivalencies=radian_length).decompose().value
         #y_range_scaled = boundary.yrange.to(y_range/mayavi_unit_length, equivalencies=radian_length).decompose().value
@@ -148,25 +150,23 @@ def visualise(aMap3D, **kwargs):
         
         if show_boundary_axes:
             axes = mlab.axes()
+            x_range = boundary.xrange.to(units_boundary.unit, equivalencies=radian_length)
+            print '\nboundary: x_range: ' + str(x_range)
+            y_range = boundary.yrange.to(units_boundary.unit, equivalencies=radian_length)
             x_range_scaled = (x_range/units_boundary).decompose().value
+            print '\nboundary: x_range_scaled: ' + str(x_range_scaled)
             y_range_scaled = (y_range/units_boundary).decompose().value
             axes.axes.ranges = np.array([ x_range_scaled[0],  x_range_scaled[1],  y_range_scaled[0],  y_range_scaled[1],  0,  0])
             str_units = ' (' + str(units_boundary) + ')'
-            axes.axes.x_label = 'Solar X ' + str_units
-            axes.axes.y_label = 'Solar Y' + str_units
+            axes.axes.x_label = 'Solar X (' + unit_label(units_boundary) + ')'
+            axes.axes.y_label = 'Solar Y (' + unit_label(units_boundary) + ')'
     # And open mayavi
     mlab.show()
 
-def scaled_length(length, scale_length, map):
-    if length.unit.is_equivalent(u.radian):
-        #print '\nscaled_length(' + str(length) + ', ' + str(scale_length) + ', map)'
-        distance = (map.dsun - map.rsun_meters)
-        #print 'distance: ' + str(distance)
-        length = (distance * length.to(u.radian)).to(u.m, equivalencies=u.dimensionless_angles())
-        #print 'length: ' + str(length)
-        #print 'output: ' + str((length / scale_length).decompose().value)
-    return (length / scale_length).decompose().value
-
+def unit_label(quantity):
+    if quantity.value == 1.0:
+        return str(quantity.unit)
+    return str(quantity)
 
 def angle_to_length(map, arc):
     """
@@ -191,16 +191,19 @@ if __name__ == '__main__':
     
     # Getting the ranges. x/y from the boundary, z is defined manually.    
     scale_length = 1.0 * u.Mm
-    x_range = scaled_length(x_obs_range, scale_length, aMap2D_cropped) * scale_length.unit
-    y_range = scaled_length(y_obs_range, scale_length, aMap2D_cropped) * scale_length.unit
-    z_range = [0.0, 10.0] * u.Mm
+    #x_range = scaled_length(x_obs_range, scale_length, aMap2D_cropped) * scale_length.unit
+    #y_range = scaled_length(y_obs_range, scale_length, aMap2D_cropped) * scale_length.unit
+    #z_range = [0.0, 10.0] * u.Mm
+    x_range=[0.0, 20.0]*u.Mm
+    y_range=[0.0, 20.0]*u.Mm
+    z_range=[0.0, 10.0]*u.Mm
 
     # Vector field as a 3D map
     a4DArray = np.random.rand(dim[0],dim[1],dim[0],3)
     aMetaDict = { 'file': 'test SunPy Map object'}
     aMap3D = Map3D(a4DArray, aMetaDict, xrange=x_range, yrange=y_range, zrange=z_range, xobsrange=x_obs_range, yobsrange=y_obs_range)
     
-    visualise(aMap3D, boundary=aMap2D, seeds=np.array([[5,5,3]]), scale=1.0*u.Mm, boundary_units=1*u.arcsec, show_volume_axes=False)
+    visualise(aMap3D, boundary=aMap2D, seeds=np.array([[5,5,3]]), scale=1.0*u.Mm, boundary_units=1.0*u.arcsec, show_volume_axes=False)
     
     """
     # Vector field as a 3D map
@@ -219,6 +222,7 @@ if __name__ == '__main__':
     y_range=[0.0, 20.0]*u.Mm
     z_range=[0.0, 20.0]*u.Mm
     x_obs_range = [-15,-15] * u.arcsec
+    y_obs_range = [-15,-15] * u.arcsec
 
     aMap3D = Map3D(a4DArray, aMetaDict, xrange=x_range, yrange=y_range, zrange=z_range)
     #aMap3D = Map3D(a4DArray, aMetaDict)
