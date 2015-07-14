@@ -37,7 +37,6 @@ class PotentialExtrapolator(Extrapolators):
 
         return Map3D(Bxyz, self.meta)
 
-    # Greens function.
     def _Gn_5_2_26(self, inR, inRPrime):
         """
         Continious Greens Function
@@ -55,8 +54,13 @@ class PotentialExtrapolator(Extrapolators):
         floOut = 1.0 / (2.0 * np.pi * floModDr)
         return floOut
     
-    # Greens function.
-    def _Gn_5_2_29(self, i, j, k, i_prime, j_prime, d, d_com):    
+    def _Gn_5_2_29(self, i, j, k, i_prime, j_prime, d, d_com):  
+        """
+        Disctete Greens Function
+        Extends _Gn_5_2_26 by taking the starting position of each magnetic
+        monopole as 1/root(2 pi) z grid cells below the surface. (as described
+        in Sakurai 1982)
+        """
         d_i = i - i_prime
         d_j = j - j_prime
         d_k = k - d_com # d / np.sqrt(2.0 * np.pi)
@@ -69,7 +73,7 @@ class PotentialExtrapolator(Extrapolators):
     
     
     # A function to extrapolate the magnetic field above the given boundary.
-    def _phi_extrapolation_python(self, boundary, d):    
+    def _phi_extrapolation_python(self, boundary, d):
         # Volume size.
         M = boundary.shape[0]
         N = boundary.shape[1]

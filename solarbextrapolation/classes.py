@@ -23,7 +23,7 @@ import warnings
 import inspect
 
 from astropy.table import Table
-#import astropy.units as u
+import astropy.units as u
 
 __all__ = ['Preprocessors', 'Extrapolators', 'Map3D', 'Map3DCube']
 
@@ -104,7 +104,11 @@ class Extrapolators(object):
         The sunpy map containing the boundary magnetogram data.
     filepath : `string`
         The optional filepath for automatic saving of extrapolation results.
-    z : `int`
+    notes : `string`
+        The optional notes regarding thius run of the extrapolation routine.
+    extrapolator_routine : `string`
+        The name for the extrapolation routine.
+    zshape : `int`
         The vertical grid size.
     notes : `string`
         User specified notes that will be added to the metadata.
@@ -117,23 +121,55 @@ class Extrapolators(object):
         self.map_boundary_data = map_magnetogram
         self.meta = { 'boundary_1_meta': self.map_boundary_data.meta }
         self.meta['extrapolator_notes'] = kwargs.get('notes', '')
-        self.z = kwargs.get('z', 1)
-        self.filepath = kwargs.get('filepath', None)
-        self.routine = kwargs.get('extrapolator_routine', type(self))
         self.xobsrange = self.map_boundary_data.xrange
         self.yobsrange = self.map_boundary_data.yrange
+        # Normalise the units to SI
+        
+        self.xrange = self.map_boundary_data.xrange
+        self.yrange = self.map_boundary_data.yrange
+        self.zrange = kwargs.get('zrange', (0.0, 1.0) * u.Mm )
+        self.shape = (self.map_boundary_data.data.shape[0],
+                      self.map_boundary_data.data.shape[1],
+                      long(kwargs.get('zshape', 1L)))
+        self.filepath = kwargs.get('filepath', None)
+        self.routine = kwargs.get('extrapolator_routine', type(self))
+
 
     def _angle_to_length(self, arc):
         """
-        Approximate a length on the surface from the arc length.
+        Approximate a surface length from the observed arc length.
         Uses the small angle approximation.
         """
-        length = ((self.map_boundary_data.dsun - self.map_boundary_data.rsun_meters) * self.map_boundary_data.xrange.to(u.radian))
+        r = self.map_boundary_data.dsun - self.map_boundary_data.rsun_meters
+        length = (r * self.map_boundary_data.xrange.to(u.radian))
         return length.to(u.m, equivalencies=u.dimensionless_angles())
+
+    def _to_SI(self):
+        """
+        
+        """
+        # Scale the x/y ranges
+        # Setup the equivilence
+        obs_distance = self.map_boundary_data.dsun - self.map_boundary_data.rsun_meters
+        radian_length = [ (u.radian, u.meter, lambda x: obs_distance * x, lambda x: x / obs_distance) ]
+        x_range = self.map_boundary_data.xrange.to(u.meter, equivalencies=radian_length)
+        y_range = self.map_boundary_data.yrange.to(u.meter, equivalencies=radian_length)
+        # Normalise to start at 0.0
+        x_range = [self.map_boundary_data.xrange[0] - self.map_boundary_data.xrange[0],
+                   self.map_boundary_data.xrange[1] - self.map_boundary_data.xrange[0]]
+        y_range = [self.map_boundary_data.yrange[0] - self.map_boundary_data.yrange[0],
+                   self.map_boundary_data.yrange[1] - self.map_boundary_data.yrange[0]]
+        
+        # Scale the magnetic field units
+        ori_bunit = u.Unit(self.map_boundary_data.meta.get('bunit', 'Tesla'))
+        scale_factor = ori_bunit.to(u.T)
+        self.map_boundary_data = self.map_boundary_data * scale_factor
+        self.map_boundary_data.meta['bunit'] = 'Tesla'
+        self.meta['boundary_1_meta']['bunit'] = 'Tesla'
 
     def _extrapolation(self):
         """
-        The routine for running an extrapolation routine.
+        The method for running an extrapolation routine.
         This is the primary method to be edited in subclasses for specific
         extrapolation routine implementations.
         """
@@ -142,9 +178,9 @@ class Extrapolators(object):
         arr_4d = np.zeros([self.map_boundary_data.data.shape[0], self.map_boundary_data.data.shape[1], 1, 3])
         
         # Calculate the ranges in each dimension in length units (meters)
-        x_range = self._angle_to_length(self.map_boundary_data.xrange)
-        y_range = self._angle_to_length(self.map_boundary_data.yrange)
-        z_range = y_range#_angle_to_length(self.map_boundary_data.xrange)
+        x_range = self._angle_to_length(self.xrange)
+        y_range = self._angle_to_length(self.yrange)
+        z_range = self.zrange
         
         map_output = Map3D( arr_4d, self.meta, xrange=x_range, yrange=y_range, zrange=z_range, xobsrange=self.xobsrange, yobsrange=self.yobsrange )
         
@@ -247,6 +283,8 @@ class Map3D(object):
         self.meta['rsun_ref'] = kwargs.get('rsun_ref', constants.radius.value)
         if kwargs.get('dsun_obs', False):
             self.meta['dsun_obs'] = kwargs.get('dsun_obs')
+        if kwargs.get('bunit', False):
+            self.meta['bunit'] = kwargs.get('bunit')
 
         # For alignment with the boundary data
         self.meta['xobsrange'] = self.xobsrange
