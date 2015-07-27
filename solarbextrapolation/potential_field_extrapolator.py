@@ -12,18 +12,22 @@ __all__ = ['PotentialExtrapolator']
 
 class PotentialExtrapolator(Extrapolators):
     """
-    | This is a greens function for extrapolating the potential (scalar) field
-    | above a given magnetogram.
-    | Exquations are from the following book:
+    This is a greens function for extrapolating the potential (scalar) field
+    above a given magnetogram.
+    Exquations are from the following book:
+    
     |     Title:      Physics of the Solar Corona
     |     Author:     T. J. M. Boyd and J. J. Sanderson
     |     Publisher:  Springer Books and Praxis Publishing
     |     ISBN:       978-3-540-30766-2
-    | See chapter 5 on potential fields.
+
+    See chapter 5 on potential fields.
     """
     def __init__(self, map_magnetogram, **kwargs):
         super(PotentialExtrapolator, self).__init__(map_magnetogram, **kwargs)
         self.meta['extrapolator_routine'] = 'Potential Field Extrapolator'
+        
+        # Convert the map to SI units.
 
     def _extrapolation(self):
         """
@@ -147,6 +151,7 @@ class PotentialExtrapolator(Extrapolators):
         return npmVecSpace
         
 if __name__ == '__main__':
-    aMap2D = sunpy.map.Map('C://git/solarextrapolation/solarextrapolation/data/example_data_(10x10)__01_hmi.fits')
+    #aMap2D = sunpy.map.Map('C://git/solarextrapolation/solarextrapolation/data/example_data_(10x10)__01_hmi.fits')
+    aMap2D = sunpy.map.Map('C://fits//temp2.fits')
     aPotExt = PotentialExtrapolator(aMap2D, filepath='C://git/solarextrapolation/solarextrapolation/3Dmap.m3d')
     aMap3D = aPotExt.extrapolate()
