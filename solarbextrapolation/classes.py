@@ -123,7 +123,8 @@ class Extrapolators(object):
         self.meta['extrapolator_notes'] = kwargs.get('notes', '')
         self.xobsrange = self.map_boundary_data.xrange
         self.yobsrange = self.map_boundary_data.yrange
-        # Normalise the units to SI
+        
+        # Normalise the units to SI May possible be added here
         
         self.xrange = self.map_boundary_data.xrange
         self.yrange = self.map_boundary_data.yrange
@@ -250,7 +251,7 @@ class Map3D(object):
         The container for additional information about the data in this object.
         Where:
         * x/y/zrange: the max/min spacial positions along the given axis.
-        * x/yobsrange: the observational data range.
+        * x/yobsrange: the observational data range, often in arcsec.
         * cdelt1/2/3: the size of each pixel in each axis.
         * unit1/2/3: the spacial units in each axis.
         * naxis1/2/3: the number of pixels in each axis.
