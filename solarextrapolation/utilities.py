@@ -19,12 +19,13 @@ def decompose_ang_len(qua_input, **kwargs):
 
     Parameters
     ----------
-    working_units : astropy unit, a unit that will be used for internal working
-    and the returned quantity. Ensure that it is of the correct physical type,
-    angle or length.
-        A 2d list or ndarray containing the map data
-    equivalencies : astropy equivilence, an equivilence used to relate the
-    length and angle units.
+    
+    working_units : astropy.unit, optional
+        Unit that will be used for internal working and the returned quantity.
+    Ensure that it is of the correct physical type, angle or length.
+    
+    equivalencies : astropy equivilence,
+        Equivilence used to relate the length and angle units.
     
     """
     # Parameters
@@ -73,12 +74,12 @@ def decompose_ang_len(qua_input, **kwargs):
         angle_unit = angle_unit.to(working_units, equivalencies=equivalence)
         
         # Strip out the units, so the output doesn't have squared lenth units
-        #angle_unit = angle_unit.value
+        #angle_unit = angle_unit.value # Kept in-case it causes bugs
     elif working_units.physical_type is u.radian.physical_type:
         length_unit = length_unit.to(working_units, equivalencies=equivalence)
 
         # Strip out the units, so the output doesn't have squared length units
-        #length_unit = length_unit.value
+        #length_unit = length_unit.value # Kept in-case it causes bugs
     # The quantity to return
     quantity =  value * length_unit ** length_exponent * angle_unit ** angle_exponent
     # Change to the working unit if not dimensionless
@@ -87,7 +88,10 @@ def decompose_ang_len(qua_input, **kwargs):
     return quantity.decompose()
     
 
-def si_this_map(map):
+def si_this_map_OLD(map):
+    """
+    Basic function to create a deep copy of a map but with all units in SI.
+    """
     # Find out the value units and convert this and data to SI
     units = 1.0 * u.Unit(map.meta['bunit']).to(u.Tesla) * u.Tesla
     print units
@@ -113,4 +117,39 @@ def si_this_map(map):
     return mp.Map((data, meta))    
 
 
+def si_this_map(map):
+    """
+    Basic function to create a deep copy of a map but with all units in SI.
+    """
+    # Find out the value units and convert this and data to SI
+    units = 1.0 * u.Unit(map.meta['bunit']).to(u.Tesla) * u.Tesla
+    print units
+    data = deepcopy(map.data) * units.value
 
+    # Setup the arc to length equivilence
+    obs_distance = map.dsun - map.rsun_meters
+    radian_length = [ (u.radian, u.meter, lambda x: obs_distance * x, lambda x: x / obs_distance) ]
+    
+    # Convert the x-axis and y-axis to SI
+    cdelt1 = (float(map.meta['cdelt1']) * u.Unit(map.meta['cunit1'])).to(u.meter, equivalencies=radian_length)
+    cdelt2 = (float(map.meta['cdelt2']) * u.Unit(map.meta['cunit2'])).to(u.meter, equivalencies=radian_length)
+    crpix1 = (float(map.meta['crpix1']) * u.Unit(map.meta['cunit1'])).to(u.meter, equivalencies=radian_length)
+    crpix2 = (float(map.meta['crpix2']) * u.Unit(map.meta['cunit2'])).to(u.meter, equivalencies=radian_length)
+    
+    # Modify the map header to reflect all these changes
+    meta = deepcopy(map.meta)
+    meta['bunit']   = units.unit
+    meta['datamax'] = data.max()
+    meta['datamin'] = data.min()
+    # Following modified if we convert x/y-axes
+    meta['cdelt1'] = str(cdelt1.value)
+    meta['cdelt2'] = str(cdelt2.value)
+    meta['cunit1'] = str(cdelt1.unit)
+    meta['cunit2'] = str(cdelt2.unit)
+    meta['crpix1'] = str(crpix1.value)
+    meta['crpix2'] = str(crpix2.value)
+    #meta['CRVAL1'] = 0.000000 # Reference data coordinates
+    #meta['CRVAL2'] = 0.000000
+    
+    # Return the modified map
+    return mp.Map((data, meta))  
