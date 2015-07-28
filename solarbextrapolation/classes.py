@@ -13,15 +13,13 @@ import numpy as np
 import pickle
 import time
 from datetime import datetime
-from astropy import units as u
-#from sunpy.sun._constants import physical_constants as con
-
-from sunpy.sun import constants
-from sunpy.sun import sun
-from sunpy.time import parse_time, is_time
+from collections import namedtuple
 import warnings
 import inspect
+#from sunpy.sun._constants import physical_constants as con
 
+from sunpy.sun import constants, sun
+from sunpy.time import parse_time, is_time
 from astropy.table import Table
 import astropy.units as u
 
@@ -307,8 +305,7 @@ class Map3D(object):
         """
 
         # Define a triple, a named tuple object for returning values
-        from collections import namedtuple
-        Triple = namedtuple('Pair', 'x y z')
+        Triple = namedtuple('Triple', 'x y z')
 
         return Triple(u.Unit(self.meta.get('cunit1', 'pix')),
                       u.Unit(self.meta.get('cunit2', 'pix')),
@@ -321,7 +318,7 @@ class Map3D(object):
         """
         # Define a triple, a named tuple object for returning values
         from collections import namedtuple
-        Triple = namedtuple('Pair', 'x y z')
+        Triple = namedtuple('Triple', 'x y z')
         
         '''
         return Triple(u.Unit(self.meta.get('cdelt1', 'arcsec')),

@@ -14,11 +14,14 @@ def decompose_ang_len(qua_input, **kwargs):
     """
     Function to help decompose quantities that have an equivilence between angles
     and length, such as photospheric observational angles and object sizes.
-    The function uses an equivilence to cobnvert into eithe length or angle
+    The function uses an equivilence to convert into either length or angle
     physical_type units.
 
     Parameters
     ----------
+    
+    qua_input : astropy.quantity
+        The quantity you wish decomposed.
     
     working_units : astropy.unit, optional
         Unit that will be used for internal working and the returned quantity.
@@ -45,7 +48,7 @@ def decompose_ang_len(qua_input, **kwargs):
             length_unit = 1.0 * qua_input.unit.bases[0]
             length_exponent = qua_input.unit.powers[0]
             
-            # Convert to SI (meter here)
+            # convert to SI (meter here)
             length_unit = length_unit.to(u.m)
         elif qua_input.unit.bases[0].physical_type is u.radian.physical_type:
             angle_unit = 1.0 * qua_input.unit.bases[0]
@@ -94,7 +97,6 @@ def si_this_map_OLD(map):
     """
     # Find out the value units and convert this and data to SI
     units = 1.0 * u.Unit(map.meta['bunit']).to(u.Tesla) * u.Tesla
-    print units
     data = deepcopy(map.data) * units.value
     
     # ATM I don't convert the x-axis and y-axis to SI
@@ -153,3 +155,4 @@ def si_this_map(map):
     
     # Return the modified map
     return mp.Map((data, meta))  
+
