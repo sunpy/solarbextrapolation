@@ -20,6 +20,14 @@ from astropy_helpers.setup_helpers import (
 from astropy_helpers.git_helpers import get_git_devstr
 from astropy_helpers.version_helpers import generate_version_py
 
+# -- Read the Docs Setup  -----------------------------------------------------
+
+on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
+
+if on_rtd:
+    os.environ['HOME'] = '/home/docs/checkouts/readthedocs.org/user_builds/sunpy/'
+    os.environ['SUNPY_CONFIGDIR'] = '/home/docs/checkouts/readthedocs.org/user_builds/sunpy/'
+
 # Get some values from the setup.cfg
 from distutils import config
 conf = config.ConfigParser()
