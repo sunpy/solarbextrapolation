@@ -56,7 +56,7 @@ class PotentialExtrapolator(Extrapolators):
         phi = self._extrapolate_phi()
         Bxyz = self._determine_vec(phi, D = 1, debug = False)
 
-        return Map3D(Bxyz, self.meta)
+        return Map3D(Bxyz, self.meta, xrange=self.xrange, yrange=self.yrange, zrange=self.zrange)
 
     def _Gn_5_2_26(self, inR, inRPrime):
         """
@@ -84,47 +84,38 @@ class PotentialExtrapolator(Extrapolators):
         """
         d_i = x - xP
         d_j = y - yP
-        d_k = z - z_submerge # d / np.sqrt(2.0 * np.pi)
+        d_k = z - z_submerge
         floModDr = np.sqrt(d_i * d_i + d_j * d_j + d_k * d_k)
         
-        #print 'floModDr: ' + str(floModDr)
         floOut = 1.0 / (2.0 * np.pi * floModDr)
-        #print 'floOut: ' + str(floOut)
         return floOut
     
     
-    # A function to extrapolate the magnetic field above the given boundary.
     def _phi_extrapolation_python(self, boundary, d):
         """
-        # Volume size.
-        M = self.shape[0]
-        N = self.shape[1]
-        Z = self.shape[2]
+        Function to extrapolate the magnetic field above the given boundary data.
         """
         
         # Derived parameters
-        #d = 1.0
-        #d_squ = np.power(d,2)
-        #d_com = d / np.sqrt(2.0 * np.pi)
-        # Get the value of the floats
         Dx_val = self.Dx.value
         Dy_val = self.Dy.value
         Dz_val = self.Dz.value
         DxDy_val = Dx_val * Dy_val
+        
         # From Sakurai 1982 P306, we submerge the monopole
         z_submerge = Dz_val / np.sqrt(2.0 * np.pi)
         
         # Create the empty numpy volume array.
         D = np.empty((self.shape[0], self.shape[1], self.shape[2]), dtype=np.float)
         
-        # Itherate though the 3D space.
+        # Iterate though the 3D space.
         for i in range(0, self.shape[0]):
             for j in range(0, self.shape[1]):
                 for k in range(0, self.shape[2]):
                     # Position of point in 3D space
                     x = i * Dx_val
-                    y = i * Dy_val
-                    z = i * Dz_val
+                    y = j * Dy_val
+                    z = k * Dz_val
                     
                     # Variable holding running total for the contributions to point.
                     point_phi_sum = 0.0
@@ -168,7 +159,7 @@ class PotentialExtrapolator(Extrapolators):
         """
         Create an empty 3D matrix from the output.
         ATM, for simplicity, I make the same size as the potential field, though the outer 2 layers are all 0.0.
-        """
+        """                    
         tupVolShape = phi.shape
         npmVecSpace = np.zeros((tupVolShape[0], tupVolShape[1], tupVolShape[2], 3)) # in Order XYZC (C = component directions)
         
@@ -188,22 +179,25 @@ class PotentialExtrapolator(Extrapolators):
 if __name__ == '__main__':
     #aMap2D = sunpy.map.Map('C://git/solarextrapolation/solarextrapolation/data/example_data_(10x10)__01_hmi.fits')
     str_folder = 'C://fits//'
-    str_boundary = 'temp2.fits'
-    str_saved = '3Dmap.m3d'
+    str_dataset = 'temp5'
+    #str_dataset = '2011-02-14__20-35-25__01_hmi'
+    str_extrapolation = str_dataset + '_3Dmap.m3d'
+    str_boundary = str_dataset + '.fits'
+    
     
     aMap2D = mp.Map(str_folder + str_boundary)
     
     if not os.path.isfile(str_folder+str_saved):
-        aPotExt = PotentialExtrapolator(aMap2D, filepath=str_folder+str_saved, zshape=10)
+        aPotExt = PotentialExtrapolator(aMap2D, filepath=str_folder+str_saved, zshape=50, zrange=u.Quantity([0, 15] * u.Mm))
         aMap3D = aPotExt.extrapolate()
-    aMap3D = Map3D.load(str_folder+str_saved)
-    print '\n\n'
-    print aMap3D.xrange
-    print aMap3D.yrange
-    print aMap3D.zrange
+    aMap3D = Map3D.load(str_folder + str_extrapolation)
+    #print '\n\n'
+    #print aMap3D.xrange
+    #print aMap3D.yrange
+    #print aMap3D.zrange
     
     
     # Visualise this
-    visualise(aMap3D, boundary=aMap2D, scale=1.0*u.Mm, boundary_unit=1.0*u.arcsec, show_boundary_axes=False, show_volume_axes=True, debug=True)
+    visualise(aMap3D, boundary=aMap2D, scale=1.0*u.Mm, boundary_unit=1.0*u.arcsec, show_boundary_axes=False, show_volume_axes=True, debug=False)
     
     

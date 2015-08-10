@@ -8,7 +8,7 @@ This module was developed with funding provided by ESA Summer of Code in Space
 (2015).
 """
 
-import sunpy.map
+
 import numpy as np
 import pickle
 import time
@@ -18,10 +18,13 @@ import warnings
 import inspect
 #from sunpy.sun._constants import physical_constants as con
 
+import sunpy.map
 from sunpy.sun import constants, sun
 from sunpy.time import parse_time, is_time
 from astropy.table import Table
 import astropy.units as u
+
+from utilities import *
 
 __all__ = ['Preprocessors', 'Extrapolators', 'Map3D', 'Map3DCube']
 
@@ -100,14 +103,19 @@ class Extrapolators(object):
     
     map_magnetogram : `sunpy.map.GenericMap`
         The sunpy map containing the boundary magnetogram data.
+    
     filepath : `string`
         The optional filepath for automatic saving of extrapolation results.
+    
     notes : `string`
         The optional notes regarding thius run of the extrapolation routine.
+    
     extrapolator_routine : `string`
         The name for the extrapolation routine.
+    
     zshape : `int`
         The vertical grid size.
+    
     notes : `string`
         User specified notes that will be added to the metadata.
     """
@@ -126,7 +134,7 @@ class Extrapolators(object):
         
         self.xrange = self.map_boundary_data.xrange
         self.yrange = self.map_boundary_data.yrange
-        self.zrange = kwargs.get('zrange', (0.0, 1.0) * u.Mm )
+        self.zrange = kwargs.get('zrange', u.Quantity([0.0, 1.0] * u.Mm) )
         self.shape = (self.map_boundary_data.data.shape[0],
                       self.map_boundary_data.data.shape[1],
                       long(kwargs.get('zshape', 1L)))
@@ -151,6 +159,14 @@ class Extrapolators(object):
         # Setup the equivilence
         obs_distance = self.map_boundary_data.dsun - self.map_boundary_data.rsun_meters
         radian_length = [ (u.radian, u.meter, lambda x: obs_distance * x, lambda x: x / obs_distance) ]
+        
+        # Extract the maps x/yrange values and convert to length units
+        #x_range = self.map_boundary_data.xrange
+        #x_range = ( decompose_ang_len(x_range[0], equivalencies=radian_length),
+        #            decompose_ang_len(x_range[1], equivalencies=radian_length) )
+        #x_range = 
+        #y_range = self.map_boundary_data.yrange
+        """
         x_range = self.map_boundary_data.xrange.to(u.meter, equivalencies=radian_length)
         y_range = self.map_boundary_data.yrange.to(u.meter, equivalencies=radian_length)
         # Normalise to start at 0.0
@@ -158,7 +174,7 @@ class Extrapolators(object):
                    self.map_boundary_data.xrange[1] - self.map_boundary_data.xrange[0]]
         y_range = [self.map_boundary_data.yrange[0] - self.map_boundary_data.yrange[0],
                    self.map_boundary_data.yrange[1] - self.map_boundary_data.yrange[0]]
-        
+        """
         # Scale the magnetic field units
         ori_bunit = u.Unit(self.map_boundary_data.meta.get('bunit', 'Tesla'))
         scale_factor = ori_bunit.to(u.T)

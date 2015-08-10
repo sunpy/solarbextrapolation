@@ -142,6 +142,10 @@ def visualise(aMap3D, **kwargs):
             print 'x_range_axis[0]: ' + str(x_range_axis[0])
             print 'y_range_axis[0]: ' + str(y_range_axis[0])
             print 'z_range_axis[0]: ' + str(z_range_axis[0])
+            
+            print '\nx_range_axis[0].value: ' + str(x_range_axis[0].value)
+            print 'x_range_axis[0].unit: ' + str(x_range_axis[0].unit)
+            print 'type(x_range_axis[0].unit): ' + str(type(x_range_axis[0].unit))
         
         axes.axes.ranges = np.array([ x_range_axis[0],  x_range_axis[1], y_range_axis[0],  y_range_axis[1], z_range_axis[0],  z_range_axis[1]])
         axes.axes.x_label = 'Solar X (' + unit_label(volume_units[0]) + ')'
@@ -210,15 +214,15 @@ def visualise(aMap3D, **kwargs):
         y_range_scaled = (y_range/mayavi_unit_length).decompose().value
 
         # Create explicit points in 3D space
-        X, Y = np.mgrid[x_range_scaled[0]:x_range_scaled[1]:aMap2D.data.shape[0]*1j,
-                        y_range_scaled[0]:y_range_scaled[1]:aMap2D.data.shape[1]*1j]
+        X, Y = np.mgrid[x_range_scaled[0]:x_range_scaled[1]:boundary.data.shape[0]*1j,
+                        y_range_scaled[0]:y_range_scaled[1]:boundary.data.shape[1]*1j]
         
         # Plot and add to the current figure
-        img_boundary = mlab.pipeline.array2d_source(X, Y, aMap2D.data, figure=fig)
+        img_boundary = mlab.pipeline.array2d_source(X, Y, boundary.data, figure=fig)
         img_boundary = mlab.pipeline.image_actor(img_boundary, figure = fig)
         
         # Color the image according to the data
-        mayavi_ct = aMap2D.plot_settings['cmap'](range(255))
+        mayavi_ct = boundary.plot_settings['cmap'](range(255))
         img_boundary.module_manager.scalar_lut_manager.lut.table = mayavi_ct*255
         
         # Legend details
@@ -304,10 +308,10 @@ if __name__ == '__main__':
 
     # Vector field as a 3D map
     a4DArray = np.load(str_vol_filepath)
-    aMetaDict = { 'file': 'test SunPy Map object'}
+    aMetaDict = { 'file': 'test SunPy Map object' }
     aMap3D = Map3D(a4DArray, aMetaDict, xrange=x_range, yrange=y_range, zrange=z_range, xobsrange=x_obs_range, yobsrange=y_obs_range)
     
     #visualise(aMap3D, boundary=aMap2D, scale=1.0*u.Mm, boundary_units=1.0*u.arcsec, show_volume_axes=False)
     seeds = np.array([[4,4,2], [-4,4,2], [4,-4,2], [-4,-4,2], [2,2,2], [-2,2,2], [2,-2,2], [-2,-2,2]])
     seeds = None
-    visualise(aMap3D, boundary=aMap2D, seeds=seeds, scale=1.0*u.Mm, boundary_unit=1.0*u.arcsec, show_boundary_axes=False, show_volume_axes=True, origin=origin)
+    visualise(aMap3D, boundary=aMap2D, seeds=seeds, scale=1.0*u.Mm, boundary_unit=1.0*u.arcsec, show_boundary_axes=False, show_volume_axes=True, origin=origin, debug=True)
