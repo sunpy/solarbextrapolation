@@ -85,6 +85,12 @@ version = package.__version__.split('-', 1)[0]
 # The full version, including alpha/beta/rc tags.
 release = package.__version__
 
+# -- Sphinx Gallery ------------------------------------------------------------
+
+extensions += ['sphinxgallery.gen_gallery']
+
+import sphinxgallery
+html_static_path = ['_static', sphinxgallery.path_static()]
 
 # -- Options for HTML output ---------------------------------------------------
 
