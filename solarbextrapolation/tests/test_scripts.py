@@ -16,6 +16,7 @@ import sunpy.map
 
 from ..classes import *
 
+# Tests for the map3D class
 
 def test_create_scalar_Map3d():
      aNumpyArray = np.zeros((2,2,2))
@@ -42,6 +43,8 @@ def text_load_Map3d(text_save_Map3d):
     aMap3D = Map3D.load(text_save_Map3d)
     # Compare the returned data array
     assert (aMap3D.data == np.zeros((2,2,2,2))).all()
+
+# Tests for the preprocessor class
 
 @pytest.fixture
 def test_create_preprocessor():

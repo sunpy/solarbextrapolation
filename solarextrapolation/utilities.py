@@ -125,7 +125,6 @@ def si_this_map(map):
     """
     # Find out the value units and convert this and data to SI
     units = 1.0 * u.Unit(map.meta['bunit']).to(u.Tesla) * u.Tesla
-    print units
     data = deepcopy(map.data) * units.value
 
     # Setup the arc to length equivilence
@@ -140,13 +139,13 @@ def si_this_map(map):
     
     # Modify the map header to reflect all these changes
     meta = deepcopy(map.meta)
-    meta['bunit']   = units.unit
+    meta['bunit']   = 'Tesla' #units.unit
     meta['datamax'] = data.max()
     meta['datamin'] = data.min()
     # Following modified if we convert x/y-axes
     meta['cdelt1'] = str(cdelt1.value)
     meta['cdelt2'] = str(cdelt2.value)
-    meta['cunit1'] = str(cdelt1.unit)
+    meta['cunit1'] = str(cdelt1.unit) 
     meta['cunit2'] = str(cdelt2.unit)
     meta['crpix1'] = str(crpix1.value)
     meta['crpix2'] = str(crpix2.value)
@@ -155,4 +154,7 @@ def si_this_map(map):
     
     # Return the modified map
     return mp.Map((data, meta))  
+
+
+
 
