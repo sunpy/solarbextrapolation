@@ -7,8 +7,10 @@ Created on Fri Jun 12 13:01:54 2015
 
 import numpy as np
 import sunpy.map as mp
+import astropy.units as u
 
 # Module Imports
+###from solarbextrapolation import *
 from classes import *
 from utilities import *
 from example_data_generator import *
@@ -155,7 +157,7 @@ class PotentialExtrapolator(Extrapolators):
         return self._phi_extrapolation_python(arr_boundary, d) #np.empty((1, 1, 1), dtype=np.float)
 
 
-    def _determine_vec(self, phi, D = 1, debug = False):        
+    def _determine_vec(self, phi, D = 1, debug = False): 
         """
         Create an empty 3D matrix from the output.
         ATM, for simplicity, I make the same size as the potential field, though the outer 2 layers are all 0.0.
@@ -187,8 +189,8 @@ if __name__ == '__main__':
     
     aMap2D = mp.Map(str_folder + str_boundary)
     
-    if not os.path.isfile(str_folder+str_saved):
-        aPotExt = PotentialExtrapolator(aMap2D, filepath=str_folder+str_saved, zshape=50, zrange=u.Quantity([0, 15] * u.Mm))
+    if not os.path.isfile(str_folder+str_extrapolation):
+        aPotExt = PotentialExtrapolator(aMap2D, filepath=str_folder+str_extrapolation, zshape=50, zrange=u.Quantity([0, 15] * u.Mm))
         aMap3D = aPotExt.extrapolate()
     aMap3D = Map3D.load(str_folder + str_extrapolation)
     #print '\n\n'

@@ -3,6 +3,9 @@
 Created on Mon Aug 10 11:26:13 2015
 
 @author: alex_
+
+Example of downloading boundary data from VSO, extrapolating using the potential
+extrapolator and visualising.
 """
 
 import numpy as np
@@ -63,13 +66,12 @@ if __name__ == '__main__':
 
     # Open the map and create a cropped version for the visualisation.
     map_boundary = mp.Map(data_hmi[0])
-    print 'xrange: ' + str(map_boundary.xrange) + '\nyrange: ' + str(map_boundary.yrange)
+    #print 'xrange: ' + str(map_boundary.xrange) + '\nyrange: ' + str(map_boundary.yrange)
     #map_boundary = mp.Map(data_aia[0]).rotate()
     #print 'xrange: ' + str(map_boundary.xrange) + '\nyrange: ' + str(map_boundary.yrange)
     
-    
     map_boundary_cropped = map_boundary.submap(xrangeextended, yrangeextended)
-    print 'xrange: ' + str(map_boundary_cropped.xrange) + '\nyrange: ' + str(map_boundary_cropped.yrange)
+    #print 'xrange: ' + str(map_boundary_cropped.xrange) + '\nyrange: ' + str(map_boundary_cropped.yrange)
     
     # Only extrapolate if we don't have a saved version
     if not os.path.isfile(str_vol_filepath):
@@ -78,4 +80,4 @@ if __name__ == '__main__':
     aMap3D = Map3D.load(str_vol_filepath)    
     
     # Visualise this
-    visualise(aMap3D, boundary=map_boundary_cropped, scale=1.0*u.Mm, boundary_unit=1.0*u.arcsec, show_boundary_axes=False, show_volume_axes=True, debug=True)
+    visualise(aMap3D, boundary=map_boundary_cropped, scale=1.0*u.Mm, boundary_unit=1.0*u.arcsec, show_boundary_axes=False, show_volume_axes=True, debug=False)

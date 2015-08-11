@@ -116,6 +116,17 @@ class Extrapolators(object):
     zshape : `int`
         The vertical grid size.
     
+    xrange : `astropy.unit.Quantity`, optional
+        The x edge to edge coordinates. If defined will manually scale the
+        boundary data.
+
+    yrange : `astropy.units.quantity.Quantity`, optional
+        The y edge to edge coordinates. If defined will manually scale the
+        boundary data.
+        
+    zrange : `astropy.unit.Quantity`
+        The vertical edge to edge coordinates for the vertical range.
+    
     notes : `string`
         User specified notes that will be added to the metadata.
     """
@@ -127,13 +138,19 @@ class Extrapolators(object):
         self.map_boundary_data = map_magnetogram
         self.meta = { 'boundary_1_meta': self.map_boundary_data.meta }
         self.meta['extrapolator_notes'] = kwargs.get('notes', '')
-        self.xobsrange = self.map_boundary_data.xrange
-        self.yobsrange = self.map_boundary_data.yrange
         
         # Normalise the units to SI May possible be added here
         
-        self.xrange = self.map_boundary_data.xrange
-        self.yrange = self.map_boundary_data.yrange
+        # Crop the boundary data if required.
+        self.xrange = kwargs.get('xrange', self.map_boundary_data.xrange)
+        self.yrange = kwargs.get('yrange', self.map_boundary_data.yrange)
+        self.map_boundary_data = self.map_boundary_data.submap(self.xrange, self.yrange)
+        self.xobsrange = self.map_boundary_data.xrange
+        self.yobsrange = self.map_boundary_data.yrange
+
+        #print '\n\nHelp for u:'
+        #print 'help(u): ' + str(help(u))
+        #print '\n\n'
         self.zrange = kwargs.get('zrange', u.Quantity([0.0, 1.0] * u.Mm) )
         self.shape = (self.map_boundary_data.data.shape[0],
                       self.map_boundary_data.data.shape[1],
@@ -535,10 +552,9 @@ class Map3DComparer(object):
 #
 #######
 if __name__ == '__main__':
-    aNewMap3D = Map3D()
+    #aNewMap3D = Map3D()
     
     # Testing a preprocessor
-    
     class PreZeros(Preprocessors):
         def __init__(self, map_magnetogram):
             super(PreZeros, self).__init__(map_magnetogram)
