@@ -47,6 +47,14 @@ conf = config.ConfigParser()
 conf.read([os.path.join(os.path.dirname(__file__), '..', 'setup.cfg')])
 setup_cfg = dict(conf.items('metadata'))
 
+# -- Read the Docs Setup  -----------------------------------------------------
+
+on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
+
+if on_rtd:
+    os.environ['SUNPY_CONFIGDIR'] = '/home/docs/checkouts/readthedocs.org/user_builds/sunpy/'
+    os.environ['HOME'] = '/home/docs/checkouts/readthedocs.org/user_builds/sunpy/'
+
 # -- General configuration ----------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
@@ -85,6 +93,12 @@ version = package.__version__.split('-', 1)[0]
 # The full version, including alpha/beta/rc tags.
 release = package.__version__
 
+# -- Sphinx Gallery ------------------------------------------------------------
+
+extensions += ['sphinxgallery.gen_gallery']
+
+import sphinxgallery
+html_static_path = ['_static', sphinxgallery.path_static()]
 
 # -- Options for HTML output ---------------------------------------------------
 
