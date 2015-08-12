@@ -8,6 +8,7 @@ this package is here:
   :maxdepth: 2
 
   self
+  auto_examples/index
 
 .. automodapi:: solarbextrapolation.classes
 .. automodapi:: solarbextrapolation.potential_field_extrapolator
