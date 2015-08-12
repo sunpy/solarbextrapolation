@@ -7,20 +7,19 @@ Created on Mon Aug 10 11:26:13 2015
 Example of downloading boundary data from VSO, extrapolating using the potential
 extrapolator and visualising.
 """
-
+# General imports
 import numpy as np
 import sunpy.map as mp
 from sunpy.net import vso
 from astropy import units as u
 import os
 
-# Module Imports
-import solarbextrapolation
-#from classes import *
-#from potential_field_extrapolator import *
-#from utilities import *
-#from example_data_generator import *
-#from visualisation_functions import *
+# Module imports
+from solarbextrapolation.classes import *
+from solarbextrapolation.potential_field_extrapolator import *
+from solarbextrapolation.utilities import *
+from solarbextrapolation.example_data_generator import *
+from solarbextrapolation.visualisation_functions import *
 
 if __name__ == '__main__':
     # Download the HMI data from VSO
