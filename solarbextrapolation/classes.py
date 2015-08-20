@@ -8,7 +8,8 @@ This module was developed with funding provided by ESA Summer of Code in Space
 (2015).
 """
 
-
+import matplotlib as mpl
+mpl.use('TkAgg') # Force mpl backend not to use qt. Else we have a conflict.
 import numpy as np
 import pickle
 import time
