@@ -48,98 +48,31 @@ class PotentialExtrapolator(Extrapolators):
         self.Dz = (self.zrange[1] - self.zrange[0]) / self.shape[2]
         
 
-    def _extrapolation(self):
+    def _extrapolation(self, **kwargs):
         """
         Override the primary execution method from the extrapolation class.
         The process is to extrapolate the potential (scalar) field (phi) and
         then use numerical differentiation (gradient) to find the vector field
         (Bxyz).
         """
-        phi = self._extrapolate_phi()
-        Bxyz = self._determine_vec(phi, D = 1, debug = False)
+        
+        # We will attempt to use numba to speed up the extrapolation.
+        """
+        try:
+            from numba import double
+            from numba.decorators import jit, autojit
+            #phi_extrapolation_numba = autojit(phi_extrapolation_python)
+            phi = autojit(self._extrapolate_phi())
+        except ImportError:
+            phi = self._extrapolate_phi()
+        """
+        
+        phi = self._extrapolate_phi(**kwargs)
+        Bxyz = self._determine_vec(phi, debug = False, **kwargs)
 
         return Map3D(Bxyz, self.meta, xrange=self.xrange, yrange=self.yrange, zrange=self.zrange)
-
-    def _Gn_5_2_26(self, inR, inRPrime):
-        """
-        Continious Greens Function
-        Treats the magnetic field silimarly to the electrostatic potential and
-        uses the assumption that all magnetic potential is from the Sun below.
-        At any one point in space (:math:`\mathbf{r}`), we have a contribution 
-        from the point on the boundary map (:math:`\mathbf{r}^\prime`) given by:
-        .. math::
-        G_n(\mathbf{r}, \mathbf{r}^\prime) = \frac{1}{2\pi|\mathbf{r} - \mathbf{r}^\prime|}
-        Which can be used to find the total field at a point as a result of
-        integrating over the whole boundary:
-        
-        """
-        floModDr = np.linalg.norm(inR - inRPrime)
-        floOut = 1.0 / (2.0 * np.pi * floModDr)
-        return floOut
     
-    def _Gn_5_2_29(self, x, y, z, xP, yP, DxDy_val, z_submerge):#i, j, k, i_prime, j_prime, d, d_com):  
-        """
-        Disctete Greens Function
-        Extends _Gn_5_2_26 by taking the starting position of each magnetic
-        monopole as 1/root(2 pi) z grid cells below the surface. (as described
-        in Sakurai 1982)
-        """
-        d_i = x - xP
-        d_j = y - yP
-        d_k = z - z_submerge
-        floModDr = np.sqrt(d_i * d_i + d_j * d_j + d_k * d_k)
-        
-        floOut = 1.0 / (2.0 * np.pi * floModDr)
-        return floOut
-    
-    
-    def _phi_extrapolation_python(self, boundary, d):
-        """
-        Function to extrapolate the magnetic field above the given boundary data.
-        """
-        
-        # Derived parameters
-        Dx_val = self.Dx.value
-        Dy_val = self.Dy.value
-        Dz_val = self.Dz.value
-        DxDy_val = Dx_val * Dy_val
-        
-        # From Sakurai 1982 P306, we submerge the monopole
-        z_submerge = Dz_val / np.sqrt(2.0 * np.pi)
-        
-        # Create the empty numpy volume array.
-        D = np.empty((self.shape[0], self.shape[1], self.shape[2]), dtype=np.float)
-        
-        # Iterate though the 3D space.
-        for i in range(0, self.shape[0]):
-            for j in range(0, self.shape[1]):
-                for k in range(0, self.shape[2]):
-                    # Position of point in 3D space
-                    x = i * Dx_val
-                    y = j * Dy_val
-                    z = k * Dz_val
-                    
-                    # Variable holding running total for the contributions to point.
-                    point_phi_sum = 0.0
-                    
-                    # Iterate through the boundary data.
-                    for i_prime in range(0, self.shape[0]):
-                        for j_prime in range(0, self.shape[1]):
-                            # Position of contributing point on 2D boundary
-                            xP = i_prime * Dx_val
-                            yP = j_prime * Dy_val
-                            
-                            # Find the components for this contribution product
-                            B_n = self.map_boundary_data.data[i_prime, j_prime]
-                            G_n = self._Gn_5_2_29(x, y, z, xP, yP, DxDy_val, z_submerge)
-    
-                            # Add the contributions
-                            point_phi_sum += B_n * G_n * DxDy_val
-                    # Now add this to the 3D grid.
-                    D[i, j, k] = point_phi_sum
-        return D
-    
-    def _extrapolate_phi(self, debug=False):
+    def _extrapolate_phi(self, debug=False, **kwargs):
         """
         A function to extrapolate the magnetic field above the given boundary.
         Assumes the input B-field boundary data is near normal (the image must
@@ -151,13 +84,36 @@ class PotentialExtrapolator(Extrapolators):
         
         # Parameters
         arr_boundary = self.map_boundary_data.data
-        d = 1.0        
-    
+        enable_numba = kwargs.get('enable_numba', True)
+        
+
+        if enable_numba:
+            try:
+                import numba
+                from potential_field_extrapolator_numba import *
+                return phi_extrapolation_numba(arr_boundary, self.shape, self.Dx.value, self.Dy.value, self.Dz.value)
+            except ImportError:
+                pass
+        from potential_field_extrapolator_python import *
+        return phi_extrapolation_python(arr_boundary, self.shape, self.Dx.value, self.Dy.value, self.Dz.value)
+        """
+        try:
+            import numba
+            from potential_field_extrapolator_numba import *
+            return phi_extrapolation_numba(arr_boundary, self.shape, self.Dx.value, self.Dy.value, self.Dz.value)
+        except ImportError:
+            from potential_field_extrapolator_python import *
+            return phi_extrapolation_python(arr_boundary, self.shape, self.Dx.value, self.Dy.value, self.Dz.value)
+        """
         # Now return the volume.
-        return self._phi_extrapolation_python(arr_boundary, d) #np.empty((1, 1, 1), dtype=np.float)
+        #return self._phi_extrapolation_python(arr_boundary) #np.empty((1, 1, 1), dtype=np.float)
+        #from potential_field_extrapolator_python import *
+        #return phi_extrapolation_python(arr_boundary, self.shape, self.Dx.value, self.Dy.value, self.Dz.value)
+        #from potential_field_extrapolator_numba import *
+        #return phi_extrapolation_numba(arr_boundary, self.shape, self.Dx.value, self.Dy.value, self.Dz.value)
 
 
-    def _determine_vec(self, phi, D = 1, debug = False): 
+    def _determine_vec(self, phi, D = 1, debug = False, **kwargs): 
         """
         Create an empty 3D matrix from the output.
         ATM, for simplicity, I make the same size as the potential field, though the outer 2 layers are all 0.0.
