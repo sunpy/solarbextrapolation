@@ -200,7 +200,7 @@ class Extrapolators(object):
         self.map_boundary_data.meta['bunit'] = 'Tesla'
         self.meta['boundary_1_meta']['bunit'] = 'Tesla'
 
-    def _extrapolation(self):
+    def _extrapolation(self, **kwargs):
         """
         The method for running an extrapolation routine.
         This is the primary method to be edited in subclasses for specific
@@ -219,14 +219,14 @@ class Extrapolators(object):
         
         return map_output
 
-    def extrapolate(self):
+    def extrapolate(self, **kwargs):
         """
         Method to be called to run the extrapolation.
         Times and saves the extrapolation where applicable.
         """
         dt_start = datetime.now()
         tim_start = time.time()
-        arr_output = self._extrapolation()
+        arr_output = self._extrapolation(**kwargs)
         tim_duration = time.time() - tim_start
 
         arr_output.meta['extrapolator_start_time'] = dt_start.isoformat()
