@@ -23,12 +23,12 @@ arr_grid_shape = [ 20, 22, 20 ]         # [ y-size, x-size ]
 xrange = u.Quantity([ -10.0, 10.0 ] * u.arcsec)
 yrange = u.Quantity([ -11.0, 11.0 ] * u.arcsec)
 zrange = u.Quantity([ 0,     20.0 ] * u.arcsec)
-    
+
 # Manual Pole Details
 arrA0 = [ u.Quantity([ 25, 25 ] * u.percent), 10.0 * u.percent,  0.2 * u.T ]
 arrA1 = [ u.Quantity([ 75, 75 ] * u.percent), 10.0 * u.percent, -0.2 * u.T ]
 
-# Generate the data and save to a map
+# Generate the data and make into a map
 arr_data = generate_example_data(arr_grid_shape[0:2], xrange, yrange, arrA0, arrA1)
 map_boundary = dummyDataToMap(arr_data, xrange, yrange)
     
