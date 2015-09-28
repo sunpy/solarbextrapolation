@@ -99,10 +99,14 @@ extensions += ['sphinxgallery.gen_gallery']
 
 import sphinxgallery
 #html_static_path = ['_static', sphinxgallery.path_static()]
-sphinx_gallery_conf = {
-                       #'find_mayavi_figures': True,
-                       'doc_module': ('solarbextrapolation', 'sunpy'),
-                       'examples_dirs': ['../examples']}
+try:
+    from mayavi import mlab
+    find_mlab_figures = True
+    mlab.options.offscreen = True
+except ImportError:
+    find_mlab_figures = False
+
+sphinx_gallery_conf = {'find_mayavi_figures': find_mlab_figures}
 
 # -- Options for HTML output ---------------------------------------------------
 
