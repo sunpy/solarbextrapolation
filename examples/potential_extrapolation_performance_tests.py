@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Aug 20 17:26:05 2015
+=====================================
+Testing Perfomance of an Extrapolator
+=====================================
 
-@author: alex_
+This tests the speed of it all.
 """
 
 # General imports
@@ -48,16 +50,16 @@ int_trials = 3 # The times to repeat each extrapolation.
 for extrapolation in lis_datasets:
     # Setup the extrapolator and table
     aPotExt = PotentialExtrapolator(extrapolation[3], zshape=extrapolation[1], zrange=extrapolation[2])
-    
-    # List to store the trial 
+
+    # List to store the trial
     lis_times = []
-    
+
     # Run the extrapolation without numba for each dataset (map and ranges).
     for i in range(0, int_trials):
         aMap3D = aPotExt.extrapolate(enable_numba=False)
         lis_times.append(aMap3D.meta['extrapolator_duration'])
     t.add_row([extrapolation[0], np.round(np.average(lis_times), 2), np.round(np.std(lis_times), 2)])
-    
+
     # Run the extrapolation with numba for each dataset (map and ranges).
     for i in range(0, int_trials):
         aMap3D = aPotExt.extrapolate(enable_numba=True)
@@ -75,4 +77,4 @@ visualise(aMap3D,
           boundary_units=[1.0*u.arcsec, 1.0*u.arcsec],
           show_volume_axes=True,
           debug=False)
-          
+
