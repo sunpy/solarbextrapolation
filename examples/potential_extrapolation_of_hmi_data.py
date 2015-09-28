@@ -49,6 +49,8 @@ result_aia = client.query(
 # Save the HMI and AIA data to a fits files.
 data_hmi = client.get(result_hmi, methods=('URL-FILE_Rice', 'URL-FILE')).wait()
 data_aia = client.get(result_aia, methods=('URL-FILE_Rice', 'URL-FILE')).wait()
+print '\n' + str(data_hmi)
+print str(data_aia) + '\n'
 
 # Cropping into the active region within the HMI map
 str_vol_filepath = data_hmi[0][0:-5] + '_Bxyz.npy'
@@ -73,7 +75,8 @@ map_boundary_cropped = map_boundary.submap(xrangeextended, yrangeextended)
 if not os.path.isfile(str_vol_filepath):
     aPotExt = PotentialExtrapolator(map_hmi_cropped_resampled, filepath=str_vol_filepath, zshape=20, zrange=zrange)
     aMap3D = aPotExt.extrapolate()
-aMap3D = Map3D.load(str_vol_filepath)    
-    
+aMap3D = Map3D.load(str_vol_filepath)
+print '\nextrapolation duration: ' + str(np.round(aMap3D.meta['extrapolator_duration'],3)) + ' s\n'
+
 # Visualise this
 visualise(aMap3D, boundary=map_boundary_cropped, scale=1.0*u.Mm, boundary_unit=1.0*u.arcsec, show_boundary_axes=False, show_volume_axes=True, debug=False)
