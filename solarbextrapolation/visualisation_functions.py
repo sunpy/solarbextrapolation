@@ -14,17 +14,13 @@ Created on Wed Jun 24 18:45:05 2015
 
 # Universal Imports
 import numpy as np
-import os
 import sunpy.map as mp
 from astropy import units as u
-import math
 
 # Visulisation Imports
-import mayavi.sources
 from mayavi import mlab
 from mayavi_seed_streamlines import SeedStreamline, Streamline
 from mayavi.tools.sources import vector_field
-from tvtk.tools import visual
 
 # Module Imports
 from classes import *
@@ -246,8 +242,7 @@ def visualise(aMap3D, **kwargs):
             axes.axes.x_label = 'Solar X (' + unit_label(boundary_units[0]) + ')'
             axes.axes.y_label = 'Solar Y (' + unit_label(boundary_units[1]) + ')'
 
-    # And open mayavi
-    mlab.show()
+    return fig
 
 def unit_label(quantity):
     """
