@@ -12,14 +12,14 @@ import numpy as np
 import sunpy.map as mp
 from sunpy.net import vso
 from astropy import units as u
+from mayavi import mlab
 import os
 
 # Module imports
-from solarbextrapolation.classes import *
-from solarbextrapolation.potential_field_extrapolator import *
-from solarbextrapolation.utilities import *
-from solarbextrapolation.example_data_generator import *
-from solarbextrapolation.visualisation_functions import *
+from solarbextrapolation.classes import Map3D
+from solarbextrapolation.potential_field_extrapolator import PotentialExtrapolator
+from solarbextrapolation.visualisation_functions import visualise
+
 
 # Download the HMI data from VSO
 
@@ -80,3 +80,4 @@ print '\nextrapolation duration: ' + str(np.round(aMap3D.meta['extrapolator_dura
 
 # Visualise this
 visualise(aMap3D, boundary=map_boundary_cropped, scale=1.0*u.Mm, boundary_unit=1.0*u.arcsec, show_boundary_axes=False, show_volume_axes=True, debug=False)
+mlab.show()

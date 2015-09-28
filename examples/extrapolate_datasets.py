@@ -13,6 +13,7 @@ matplotlib.use('Agg')
 import numpy as np
 import sunpy.map as mp
 from astropy import units as u
+from mayavi import mlab
 
 # Module Imports
 from solarbextrapolation.classes import *
