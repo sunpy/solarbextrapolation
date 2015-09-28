@@ -10,10 +10,6 @@ using mayavi.
 You can use this class thus:
 
 Create a new Streamline instance and add it to a pipeline
-
->>> from pysac.plot.mayavi_seed_streamline import SeedStreamline
->>> field_lines = SeedStreamline(seed_points = np.array(seeds))
->>> myvectorfield.add_child(field_lines)
 """
 
 import numpy as np
@@ -29,23 +25,25 @@ class SeedStreamline(Streamline):
     """
     This class is a modification of the mayavi Streamline class that accepts
     an array of seed points as a input rather than a widget.
-    
+
     Examples
     --------
     Create a new Streamline instance and add it to a pipeline
-    
-    >>> from pysac.plot.mayavi_seed_streamline import SeedStreamline
+
+    >>> from solarbextrapolation.mayavi_seed_streamlines import SeedStreamline
+    >>> import numpy as np
+    >>> seeds = [[1, 2, 5], [3, 4, 5]]
     >>> field_lines = SeedStreamline(seed_points = np.array(seeds))
-    >>> myvectorfield.add_child(field_lines)
+    >>> myvectorfield.add_child(field_lines) #doctest: +SKIP
     """
-    
+
     seed_points = Array(allow_none=False)
     seed = Instance(tvtk.PolyData, args=())
     update_mode = Trait('interactive', TraitPrefixList(['interactive',
                                                          'semi-interactive',
                                                          'non-interactive']),
                          desc='the speed at which the poly data is updated')
-    
+
     def setup_pipeline(self):
         """Override this method so that it *creates* the tvtk
         pipeline.
@@ -102,7 +100,7 @@ class SeedStreamline(Streamline):
         self.actor.set_lut(mm.scalar_lut_manager.lut)
 
         self.pipeline_changed = True
-    
+
     def _seed_points_changed(self, old, new):
         self.seed = tvtk.PolyData(points=self.seed_points)
 
@@ -122,7 +120,7 @@ class SeedStreamline(Streamline):
         self.outputs = [new.output]
 
         self.update_pipeline()
-        
+
     def _seed_changed(self, old, new):
         st = self.stream_tracer
         if st is not None:

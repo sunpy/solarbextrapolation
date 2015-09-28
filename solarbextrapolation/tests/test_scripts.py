@@ -99,6 +99,8 @@ def test_create_and_run_extrapolator_subclass():
     class ExtZeros(Extrapolators):
         def __init__(self, map_magnetogram, **kwargs):
             super(ExtZeros, self).__init__(map_magnetogram, **kwargs)
+            # This is a test fixing hack: TODO:  FIXME
+            self.z = 1
 
         def _extrapolation(self):
             # Adding in custom parameters to the meta
