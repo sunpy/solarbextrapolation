@@ -52,16 +52,16 @@ def visualise(aMap3D, **kwargs):
         If set, provides the 2D map to place in the visulisation at the base of
     the volume.
 
-    unit_length : astropy.unit, optional
+    unit_length : `astropy.units.quantity.Quantity`, optional
         If set, provides the length of one unit in MayaVi for scaling maps.
 
-    boundary_unit : astropy.unit, optional
+    boundary_unit : `astropy.units.quantity.Quantity`, optional
         If set, provides a single unit for the x/y-axes of the boundary map.
 
     boundary_units : list, optional
         If set, provides a list of units for the x/y-axes of the boundary map.
 
-    volume_unit : astropy.unit, optional
+    volume_unit : `astropy.units.quantity.Quantity`, optional
         If set, provides a single unit for the x/y/z-axes of the 3D vector field.
 
     volume_units : list, optional
@@ -75,17 +75,17 @@ def visualise(aMap3D, **kwargs):
     """
 
     # Optional parameters
-    boo_debug = kwargs.get('debug', False)
-    np_seeds = kwargs.get('seeds', None)
-    boundary = kwargs.get('boundary', None)
-    mayavi_unit_length = kwargs.get('unit_length', 1.0 * u.Mm)
-    boundary_unit = kwargs.get('boundary_unit', mayavi_unit_length)
-    boundary_units = kwargs.get('boundary_units', [ boundary_unit, boundary_unit, boundary_unit ])
-    volume_unit = kwargs.get('volume_unit', mayavi_unit_length)
-    volume_units = kwargs.get('volume_units', [ volume_unit, volume_unit, volume_unit ])
+    boo_debug          = kwargs.get('debug', False)
+    np_seeds           = kwargs.get('seeds', None)
+    boundary           = kwargs.get('boundary', None)
+    mayavi_unit_length = kwargs.get('unit_length', 1.0 * u.Mm) * 1.0
+    boundary_unit      = kwargs.get('boundary_unit', mayavi_unit_length) * 1.0
+    boundary_units     = kwargs.get('boundary_units', [ boundary_unit, boundary_unit, boundary_unit ])
+    volume_unit        = kwargs.get('volume_unit', mayavi_unit_length) * 1.0
+    volume_units       = kwargs.get('volume_units', [ volume_unit, volume_unit, volume_unit ])
     show_boundary_axes = kwargs.get('show_boundary_axes', True)
-    show_volume_axes = kwargs.get('show_volume_axes', True)
-
+    show_volume_axes   = kwargs.get('show_volume_axes', True)
+    
     # Setup the arc to length equivilence
     obs_distance = aMap3D.dsun - aMap3D.rsun_meters
     radian_length = [ (u.radian, u.meter, lambda x: obs_distance * x, lambda x: x / obs_distance) ]
@@ -143,6 +143,8 @@ def visualise(aMap3D, **kwargs):
             print 'type(x_range_axis[0].unit): ' + str(type(x_range_axis[0].unit))
 
         axes.axes.ranges = np.array([ x_range_axis[0],  x_range_axis[1], y_range_axis[0],  y_range_axis[1], z_range_axis[0],  z_range_axis[1]])
+        axes.axes.use_ranges = True
+        #axes.axes.ranges = np.array([ 0.0, 10.0, 0.0, 10.0, z_range_axis[0],  z_range_axis[1]])
         axes.axes.x_label = 'Solar X (' + unit_label(volume_units[0]) + ')'
         axes.axes.y_label = 'Solar Y (' + unit_label(volume_units[1]) + ')'
         axes.axes.z_label = 'Z (' + unit_label(volume_units[2]) + ')'
@@ -239,6 +241,7 @@ def visualise(aMap3D, **kwargs):
 
             # Update the ranges manually to use custom units for the boundary
             axes.axes.ranges = np.array([ x_range_scaled[0],  x_range_scaled[1],  y_range_scaled[0],  y_range_scaled[1],  0,  0])
+            axes.axes.use_ranges = True
             axes.axes.x_label = 'Solar X (' + unit_label(boundary_units[0]) + ')'
             axes.axes.y_label = 'Solar Y (' + unit_label(boundary_units[1]) + ')'
 
