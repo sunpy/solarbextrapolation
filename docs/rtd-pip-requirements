@@ -3,4 +3,4 @@ matplotlib
 astropy-helpers
 astropy
 sunpy
-sphinx-gallery
+git+https://github.com/sphinx-gallery/sphinx-gallery.git
