@@ -8,7 +8,8 @@ This module was developed with funding provided by ESA Summer of Code in Space
 (2015).
 """
 
-
+import matplotlib as mpl
+mpl.use('TkAgg') # Force mpl backend not to use qt. Else we have a conflict.
 import numpy as np
 import pickle
 import time
@@ -16,6 +17,7 @@ from datetime import datetime
 from collections import namedtuple
 import warnings
 import inspect
+from copy import deepcopy
 #from sunpy.sun._constants import physical_constants as con
 
 import sunpy.map
@@ -59,7 +61,7 @@ class Preprocessors(object):
         self.meta['preprocessor_routine'] = self.routine
         self.filepath = kwargs.get('filepath', None)
 
-    def _preprocessor(self):
+    def _preprocessor(self, **kwargs):
         """
         Method running the and returning a sunpy map.
         For tracability this should add entries into the metadata that
@@ -68,7 +70,7 @@ class Preprocessors(object):
         map_output = sunpy.map.Map(self.map_input.data, self.meta)
         return map_output
 
-    def preprocess(self):
+    def preprocess(self, **kwargs):
         
         """
         Method to be called to run the preprocessor.
@@ -116,6 +118,17 @@ class Extrapolators(object):
     zshape : `int`
         The vertical grid size.
     
+    xrange : `astropy.unit.Quantity`, optional
+        The x edge to edge coordinates. If defined will manually scale the
+        boundary data.
+
+    yrange : `astropy.units.quantity.Quantity`, optional
+        The y edge to edge coordinates. If defined will manually scale the
+        boundary data.
+        
+    zrange : `astropy.unit.Quantity`
+        The vertical edge to edge coordinates for the vertical range.
+    
     notes : `string`
         User specified notes that will be added to the metadata.
     """
@@ -127,13 +140,19 @@ class Extrapolators(object):
         self.map_boundary_data = map_magnetogram
         self.meta = { 'boundary_1_meta': self.map_boundary_data.meta }
         self.meta['extrapolator_notes'] = kwargs.get('notes', '')
-        self.xobsrange = self.map_boundary_data.xrange
-        self.yobsrange = self.map_boundary_data.yrange
         
         # Normalise the units to SI May possible be added here
         
-        self.xrange = self.map_boundary_data.xrange
-        self.yrange = self.map_boundary_data.yrange
+        # Crop the boundary data if required.
+        self.xrange = kwargs.get('xrange', self.map_boundary_data.xrange)
+        self.yrange = kwargs.get('yrange', self.map_boundary_data.yrange)
+        self.map_boundary_data = self.map_boundary_data.submap(self.xrange, self.yrange)
+        self.xobsrange = self.map_boundary_data.xrange
+        self.yobsrange = self.map_boundary_data.yrange
+
+        #print '\n\nHelp for u:'
+        #print 'help(u): ' + str(help(u))
+        #print '\n\n'
         self.zrange = kwargs.get('zrange', u.Quantity([0.0, 1.0] * u.Mm) )
         self.shape = (self.map_boundary_data.data.shape[0],
                       self.map_boundary_data.data.shape[1],
@@ -142,7 +161,7 @@ class Extrapolators(object):
         self.routine = kwargs.get('extrapolator_routine', type(self))
 
 
-    def _angle_to_length(self, arc):
+    def _angle_to_length(self, arc, **kwargs):
         """
         Approximate a surface length from the observed arc length.
         Uses the small angle approximation.
@@ -151,7 +170,7 @@ class Extrapolators(object):
         length = (r * self.map_boundary_data.xrange.to(u.radian))
         return length.to(u.m, equivalencies=u.dimensionless_angles())
 
-    def _to_SI(self):
+    def _to_SI(self, **kwargs):
         """
         
         """
@@ -182,7 +201,7 @@ class Extrapolators(object):
         self.map_boundary_data.meta['bunit'] = 'Tesla'
         self.meta['boundary_1_meta']['bunit'] = 'Tesla'
 
-    def _extrapolation(self):
+    def _extrapolation(self, **kwargs):
         """
         The method for running an extrapolation routine.
         This is the primary method to be edited in subclasses for specific
@@ -201,18 +220,19 @@ class Extrapolators(object):
         
         return map_output
 
-    def extrapolate(self):
+    def extrapolate(self, **kwargs):
         """
         Method to be called to run the extrapolation.
         Times and saves the extrapolation where applicable.
         """
         dt_start = datetime.now()
         tim_start = time.time()
-        arr_output = self._extrapolation()
+        arr_output = self._extrapolation(**kwargs)
         tim_duration = time.time() - tim_start
 
         arr_output.meta['extrapolator_start_time'] = dt_start.isoformat()
         arr_output.meta['extrapolator_duration'] = tim_duration
+        arr_output.meta['extrapolator_duration_unit'] = u.s
 
         if self.filepath:
             arr_output.save(self.filepath)
@@ -226,7 +246,7 @@ class AnalyticalModel(object):
     Use the models to evaluate the accuracy of an extrapolation routine with
     the figures of merit.
     """
-    def __init__(self):
+    def __init__(self, **kwargs):
         dim = 16
         # 
         header = {'ZNAXIS': 3, 'ZNAXIS1': dim, 'ZNAXIS2': dim, 'ZNAXIS3': dim}
@@ -237,15 +257,15 @@ class AnalyticalModel(object):
         magnetogram_header  = {'ZNAXIS': 2, 'ZNAXIS1': dim, 'ZNAXIS2': dim}
         self.magnetogram = sunpy.map.Map((magnetogram, magnetogram_header))
 
-    def generate(self):
+    def generate(self, **kwargs):
         """
-        Calculate the vector field and return.
+        Calculate the vector field and return as a Map3D object.
         """
         return self.map
 
-    def to_magnetogram(self):
+    def to_magnetogram(self, **kwargs):
         """
-        Calculate the LoS vector field as a sunpy map and return.
+        Calculate the LoS vector field as a SunPy map and return.
         """
         return self.magnetogram
 
@@ -307,7 +327,7 @@ class Map3D(object):
 
     
     @property
-    def is_scalar(self):
+    def is_scalar(self, **kwargs):
         """
         Returns true if data is a volume of scalar values (3D array) or false
         if it is a volume of vector values (4D array).
@@ -315,7 +335,7 @@ class Map3D(object):
         return (True if self.data.ndim is 3 else False)
     
     @property
-    def units(self):
+    def units(self, **kwargs):
         """
         Image coordinate units along the x, y and z axes (cunit1/2/3).
         """
@@ -328,7 +348,7 @@ class Map3D(object):
                       u.Unit(self.meta.get('cunit3', 'pix')))
     
     @property
-    def scale(self):
+    def scale(self, **kwargs):
         """
         Image scale along the x, y and z axes in units/pixel (cdelt1/2/3)
         """
@@ -346,12 +366,12 @@ class Map3D(object):
                       self.meta.get('cdelt3', 1.) * self.units.z / u.pixel)
     
     @property
-    def rsun_meters(self):
+    def rsun_meters(self, **kwargs):
         """Radius of the sun in meters"""
         return u.Quantity(self.meta.get('rsun_ref', constants.radius), 'meter')
 
     @property
-    def date(self):
+    def date(self, **kwargs):
         """Image observation time"""
         time = parse_time(self.meta.get('date-obs', 'now'))
         if time is None:
@@ -359,7 +379,7 @@ class Map3D(object):
         return parse_time(time)
 
     @property
-    def dsun(self):
+    def dsun(self, **kwargs):
         """
         The observer distance from the Sun.
         """
@@ -374,7 +394,7 @@ class Map3D(object):
         
 # #### I/O routines #### #
     @classmethod
-    def load(self, filepath):
+    def load(self, filepath, **kwargs):
         """
         Load a Map3D instance using pickle.
         """
@@ -424,7 +444,7 @@ class Map3DCube:
                 raise ValueError(
                            'CompositeMap expects pre-constructed map objects.')
 
-    def __getitem__(self, key):
+    def __getitem__(self, key, **kwargs):
         """
         Overriding indexing operation.  If the key results in a single map,
         then a map object is returned.  This allows functions like enumerate to
@@ -435,14 +455,14 @@ class Map3DCube:
         else:
             return Map3DCube(self.maps[key])
 
-    def __len__(self):
+    def __len__(self, **kwargs):
         """
         Return the number of maps in a mapcube.
         """
         return len(self.maps)
     
     
-    def all_maps_same_shape(self):
+    def all_maps_same_shape(self, **kwargs):
         """
         Tests if all the 3D maps have the same shape.
         """
@@ -467,23 +487,53 @@ class Map3DComparer(object):
     | Note: all vector fields must be of the same shape.
     """
     def __init__(self, map3D, *args, **kwargs):
+        # Use all the user parameters
         self.maps_list = map3D + expand_list(args)
         self.benchmark = kwargs.get('benchmark', 0) # Defaults to the first vector field in the list
         self.normalise = kwargs.get('normalise', False)
         
+        # The table to store the test results
+        self.results = Table(names=('extrapolator routine', 'extrapolation duration', 'fig of merit 1'), meta={'name': '3D field comparison table'}, dtype=('S24', 'f8', 'f8'))
+        t['time (ave)'].unit = u.s
+        
         # An empty table for the results:
-        N = len(self.maps_list)
-        t1, t2, t3, t4, t5, t6, t7 = [None] * N, [None] * N, [None] * N, [None] * N, [None] * N, [None] * N, [None] * N
-        self.results = Table([t1, t2, t3, t4, t5, t6, t7], names=('l-infinity norm', 'test 2', 'test 3', 'test 4', 'test 5', 'test 6', 'test 7'), meta={'name': 'Results Table'})
-        self.results_normalised = Table([t1, t2, t3, t4, t5, t6, t7], names=('l-infinity norm', 'test 2', 'test 3', 'test 4', 'test 5', 'test 6', 'test 7'), meta={'name': 'Results Table'})
-
-        for m in self.maps:
+        #N = len(self.maps_list)
+        #t1, t2, t3, t4, t5, t6, t7 = [None] * N, [None] * N, [None] * N, [None] * N, [None] * N, [None] * N, [None] * N
+        #self.results = Table([t1, t2, t3, t4, t5, t6, t7], names=('l-infinity norm', 'test 2', 'test 3', 'test 4', 'test 5', 'test 6', 'test 7'), meta={'name': 'Results Table'})
+        #self.results_normalised = Table([t1, t2, t3, t4, t5, t6, t7], names=('l-infinity norm', 'test 2', 'test 3', 'test 4', 'test 5', 'test 6', 'test 7'), meta={'name': 'Results Table'})
+        
+        # Ensure that the input maps are all the same type and shape.
+        for m in self.maps_list:#self.maps:
+            # Check that this is a Map3D object.
             if not isinstance(m, Map3D):
                 raise ValueError(
-                         'CompositeMap expects pre-constructed map3D objects.')
+                         'Map3DComparer expects pre-constructed map3D objects.')
+            
+            # Compare the shape of this Map3D to the first in the Map3D list.
+            if not m.data.shape == self.maps_list[0]:
+                raise ValueError(
+                         'Map3DComparer expects map3D objects with identical dimensions.')
+        
 
+    def _normalise():
+        """
+        Return the normalised table.
+        """
+        # Get the benchmark extrapolation result.
+        row_benchmark = self.results[self.benchmark]
+        
+        # Create a copy of the table
+        tbl_output = deepcopy(self.results)
+        
+        for row in tbl_output:
+            for val, val_benchmark in zip(row, row_benchmark):
+                # If the value is a float then normalise.
+                if type(val) == np.float64 or type(val) == np.float32 or type(val) == np.float16:
+                    val = val / val_benchmark
+            
+        
 
-    def L_infin_norm(map_field, benchmark):
+    def L_infin_norm(map_field, benchmark, **kwargs):
         """
         l-infinity norm of the vector field.
         For vector field :math:`\bfx` this would be:
@@ -513,15 +563,31 @@ class Map3DComparer(object):
         # Output            
         return output
 
-    def compare_all(self):
-        num_tests = 1
-        num_maps = len(self.maps)
-        arr_data = np.zeros([num_tests, num_maps])
-
+    def compare_all(self, **kwargs):
+        """
+        Compare all of the given vector fields and return the results as an
+        astropy.table.
+        """        
+        #num_tests = 1
+        #num_maps = len(self.maps)
+        #arr_data = np.zeros([num_tests, num_maps])
+        
+        # For each given 3D field, run all the tests and add a row to the table.
         for map3D in self.maps:
+            # Get the data
             arr_data = map3D.data
-            result = self.L_infin_norm(arr_data)
             
+            # Store the results from each test for this field.
+            lis_results = [ map3D.meta.get('extrapolator_routine', 'Unknown Routine'),
+                            map3D.meta.get( 'extrapolator_duration', 0.0 ) ]
+            
+            # Run through all the tests and append results to the list.
+            lis_results.append(self.L_infin_norm(arr_data))
+            
+            # Now add the results to the table.
+            self.results.add_row(lis_results)
+        
+        
         if self.normalise:
             self.results_normalised
         else:
@@ -535,10 +601,9 @@ class Map3DComparer(object):
 #
 #######
 if __name__ == '__main__':
-    aNewMap3D = Map3D()
+    #aNewMap3D = Map3D()
     
     # Testing a preprocessor
-    
     class PreZeros(Preprocessors):
         def __init__(self, map_magnetogram):
             super(PreZeros, self).__init__(map_magnetogram)
