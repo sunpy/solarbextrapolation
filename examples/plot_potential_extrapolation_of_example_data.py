@@ -13,11 +13,10 @@ from astropy import units as u
 from mayavi import mlab
 
 # Module imports
-from solarbextrapolation.classes import *
-from solarbextrapolation.potential_field_extrapolator import *
-from solarbextrapolation.utilities import *
-from solarbextrapolation.example_data_generator import *
-from solarbextrapolation.visualisation_functions import *
+from solarbextrapolation.classes import Map3D
+from solarbextrapolation.potential_field_extrapolator import PotentialExtrapolator
+from solarbextrapolation.example_data_generator import generate_example_data, dummyDataToMap
+from solarbextrapolation.visualisation_functions import visualise
 
 # The input parameters:
 arr_grid_shape = [ 20, 22, 20 ]         # [ y-size, x-size ]
@@ -46,5 +45,4 @@ fig = visualise(aMap3D,
                 boundary_units=[1.0*u.arcsec, 1.0*u.arcsec],
                 show_volume_axes=True,
                 debug=False)
-
-#mlab.show()
+mlab.show()

@@ -143,8 +143,8 @@ if __name__ == '__main__':
 
     aMap2D = mp.Map(str_folder + str_boundary)
 
-    if not os.path.isfile(str_folder+str_saved):
-        aPotExt = PotentialExtrapolator(aMap2D, filepath=str_folder+str_saved, zshape=50, zrange=u.Quantity([0, 15] * u.Mm))
+    if not os.path.isfile(str_extrapolation):
+        aPotExt = PotentialExtrapolator(aMap2D, filepath=str_extrapolation, zshape=50, zrange=u.Quantity([0, 15] * u.Mm))
         aMap3D = aPotExt.extrapolate()
     aMap3D = Map3D.load(str_folder + str_extrapolation)
     #print '\n\n'
@@ -155,5 +155,5 @@ if __name__ == '__main__':
 
     # Visualise this
     visualise(aMap3D, boundary=aMap2D, scale=1.0*u.Mm, boundary_unit=1.0*u.arcsec, show_boundary_axes=False, show_volume_axes=True, debug=False)
-
+    mlab.show()
 
