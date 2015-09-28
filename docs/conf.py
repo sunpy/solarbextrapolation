@@ -52,8 +52,8 @@ setup_cfg = dict(conf.items('metadata'))
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 
 if on_rtd:
-    os.environ['SUNPY_CONFIGDIR'] = '/home/docs/checkouts/readthedocs.org/user_builds/sunpy/'
-    os.environ['HOME'] = '/home/docs/checkouts/readthedocs.org/user_builds/sunpy/'
+    os.environ['SUNPY_CONFIGDIR'] = '/home/docs/checkouts/readthedocs.org/user_builds/solarbextrapolation/'
+    os.environ['HOME'] = '/home/docs/checkouts/readthedocs.org/user_builds/solarbextrapolation/'
 
 # -- General configuration ----------------------------------------------------
 
