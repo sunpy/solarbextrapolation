@@ -35,7 +35,7 @@ map_boundary = dummyDataToMap(arr_data, xrange, yrange)
 # Use potential extrapolator to generate field
 aPotExt = PotentialExtrapolator(map_boundary, zshape=arr_grid_shape[2], zrange=zrange)
 aMap3D  = aPotExt.extrapolate(enable_numba=True)
-print aMap3D.meta['extrapolator_duration']
+print '\nextrapolation duration: ' + str(np.round(aMap3D.meta['extrapolator_duration'],3)) + ' s\n'
 
 # Visualise
 visualise(aMap3D,

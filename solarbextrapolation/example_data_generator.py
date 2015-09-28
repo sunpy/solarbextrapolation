@@ -15,6 +15,7 @@ import random
 import sunpy.map as mp
 import re
 from astropy import units as u
+from datetime import datetime
 
 # Function to generate the grid with Gaussian points.
 # Arguments are:
@@ -128,13 +129,17 @@ def generate_example_data(shape, xrange, yrange, *argv):
     return arr_data
     
 # A function that creates a dummy header and saves the input as a fits file.
-def dummyDataToMap(data, xrange, yrange):
+def dummyDataToMap(data, xrange, yrange, **kwargs):
     """
-    Basic function for taking generated data and retuning a valid sunpy.map.
+    Basic function for taking generated data and returning a valid sunpy.map.
     """
+    # The kwargs
+    dic_user_def_meta = kwargs.get('meta', {})
+    
     # Create a header dictionary.
     dicHeader = {
-                  'bunit':  'Gauss',
+                  't_obs':    datetime.now().isoformat(),
+                  'bunit':    'Tesla', #'Gauss',
                   'bitpix':   64, #re.search('\\d+', 'float64')[0],#64, # Automatic        
                   'naxis':    2,  # Automatic
                   'naxis1':   8,  # Automatic
@@ -149,9 +154,15 @@ def dummyDataToMap(data, xrange, yrange):
                   'dsun_ref': 149597870691,
                   'datamax':  data.max(),
                   'datamin':  data.min(),
+                  'datavals': data.shape[0] * data.shape[0],
                   'CRVAL1':   (xrange[0].value + xrange[1].value)/2.0, #0.000000,
                   'CRVAL2':   (yrange[0].value + yrange[1].value)/2.0
     }
+
+    # Add the user defined meta entries
+    for key, value in dic_user_def_meta.iteritems():
+        dicHeader[key] = value
+        #print str(key) + ': ' + str(value)
     
     # Create and return a sunpy map from the data
     return mp.Map((data, dicHeader))

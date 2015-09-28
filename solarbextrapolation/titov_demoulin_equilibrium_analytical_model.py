@@ -36,6 +36,13 @@ from astropy import units as u
 from numba import double
 from numba.decorators import jit, autojit
 
+# Module Imports
+###from solarbextrapolation import *
+from classes import *
+from utilities import *
+from example_data_generator import *
+from visualisation_functions import *
+
 # Universal values.
 from scipy.constants import  mu_0, pi, au
 # mu_0 = 1.256637061 * 10^-6 # T m A^-1
@@ -48,11 +55,20 @@ qua_TD_R = 85.0*10**6 * u.m # m  # Radius of circle of current I (makes area a)
 qua_TD_q = 100.0 * 10**12 * u.m * u.m * u.T  # T m^2  # ABS Charge of +q and -q.
 qua_TD_a = 31.0*10**6 * u.m  # m      # Radius of uniform current I.
 
-qua_TD_I_0 = -7.0*10**12 *u.A # A # - 7.0 TA #
-qua_TD_li = 1.0 / 2.0 # for uniform distribution of current over toroidal flux tube. 
-qua_TD_I = 8.0 * pi * qua_TD_q * qua_TD_L * qua_TD_R * (qua_TD_R**2.0 + qua_TD_L**2)**(-3.0/2.0) / ( mu_0 * (np.log(8.0 * qua_TD_R / qua_TD_a) - (3.0/2.0) + (qua_TD_li / 2.0)) ) # 11 # 11000 GA # Equilibrium
+qua_TD_I_0 = -7.0*10**12 * u.A # A # - 7.0 TA #
+flo_TD_li = 1.0 / 2.0 # for uniform distribution of current over toroidal flux tube. 
+
+# Convert all these into SI units
+flo_TD_L   = qua_TD_L.to(u.m).value
+flo_TD_d   = qua_TD_d.to(u.m).value
+flo_TD_R   = qua_TD_R.to(u.m).value
+flo_TD_q   = qua_TD_q.value # This doesn't convert into SI units
+flo_TD_a   = qua_TD_a.to(u.m).value
+flo_TD_I_0 = qua_TD_I_0.to(u.A).value
+flo_TD_I   = 8.0 * pi * flo_TD_q * flo_TD_L * flo_TD_R * (flo_TD_R**2.0 + flo_TD_L**2)**(-3.0/2.0) / ( mu_0 * (np.log(8.0 * flo_TD_R / flo_TD_a) - (3.0/2.0) + (flo_TD_li / 2.0)) )
 
 
+"""
 TD_L = 50.0*10**6  # m  # Distance of +q/-q from centre of volume.
 TD_d = 50.0*10**6  # m  # Depth of I_0 below photosphere.
 TD_R = 85.0*10**6 # m  # Radius of circle of current I (makes area a)
@@ -68,7 +84,7 @@ TD_I = 8.0 * pi * TD_q * TD_L * TD_R * (TD_R**2.0 + TD_L**2)**(-3.0/2.0) / ( mu_
 TD_L_unit, TD_d_unit, TD_R_unit, TD_a_unit = 'm', 'm', 'm', 'm'
 TD_q_unit = 'Tm2'
 TD_I_0_unit = 'A'
-
+"""
 
 
 ###############################################################################
@@ -488,4 +504,51 @@ def B_I(x, y, z, R, a, d, I, Dx, A_I_r_perp_interpolator, debug = 0):
     
 
 if __name__ == '__main__':
+    # User-specified parameters
+    tup_shape = ( 20, 20, 20 )
+    x_range = ( -80.0, 80 ) * u.Mm
+    y_range = ( -80.0, 80 ) * u.Mm
+    z_range =  ( 0.0, 120 ) * u.Mm
+    
+    # Derived parameters (make SI where applicable)
+    x_0 = x_range[0].to(u.m).value
+    Dx = (( x_range[1] - x_range[0] ) / ( tup_shape[0] * 1.0 )).to(u.m).value
+    x_size = Dx * tup_shape[0]
+    y_0 = y_range[0].to(u.m).value
+    Dy = (( y_range[1] - y_range[0] ) / ( tup_shape[1] * 1.0 )).to(u.m).value
+    y_size = Dy * tup_shape[1]
+    z_0 = z_range[0].to(u.m).value
+    Dz = (( z_range[1] - z_range[0] ) / ( tup_shape[2] * 1.0 )).to(u.m).value
+    z_size = Dy * tup_shape[2]
+    
+    # For B_I field only, to save re-creating this interpolator for every cell.
+    A_I_r_perp_interpolator = interpolate_A_I_from_r_perp(flo_TD_R, flo_TD_a, flo_TD_d, flo_TD_I, (x_size**2 + y_size**2 + z_size**2)**(0.5)*1.2, 1000`0)
+
+    field = np.zeros( ( tup_shape[0], tup_shape[1], tup_shape[2], 3 ) ) 
+    for i in range(0, tup_shape[0]):
+        for j in range(0, tup_shape[1]):
+            for k in range(0, tup_shape[2]):
+                # Position of this point in space
+                x_pos = x_0 + ( i + 0.5 ) * Dx
+                y_pos = y_0 + ( j + 0.5 ) * Dy
+                z_pos = z_0 + ( k + 0.5 ) * Dz
+                
+                #field[i,j,k] = B_theta(x_pos, y_pos, z_pos, flo_TD_a, flo_TD_d, flo_TD_R, flo_TD_I, flo_TD_I_0)
+                #field[i,j,k] = B_q(x_pos, y_pos, z_pos, flo_TD_L, flo_TD_d, flo_TD_q)
+                #field[i,j,k] = B_I(x_pos, y_pos, z_pos, flo_TD_R, flo_TD_a, flo_TD_d, flo_TD_I, Dx, A_I_r_perp_interpolator)
+                field[i,j,k] = B_theta(x_pos, y_pos, z_pos, flo_TD_a, flo_TD_d, flo_TD_R, flo_TD_I, flo_TD_I_0) + B_q(x_pos, y_pos, z_pos, flo_TD_L, flo_TD_d, flo_TD_q) + B_I(x_pos, y_pos, z_pos, flo_TD_R, flo_TD_a, flo_TD_d, flo_TD_I, Dx, A_I_r_perp_interpolator)
+                                
+                
+     
+        
+    map_field = Map3D( field, {}, xrange=x_range, yrange=y_range, zrange=z_range )
+    np_boundary_data = field[:,:,0,2].T
+    dummyDataToMap(np_boundary_data, x_range, y_range)
+    
+    #dic_boundary_data = { 'datavals': np_boundary_data.data.shape[0]**2, 'dsun_obs': 147065396219.34,  }
+    visualise(map_field, scale=1.0*u.Mm, show_volume_axes=True, debug=True)
+     
+        
+        
+        
     
