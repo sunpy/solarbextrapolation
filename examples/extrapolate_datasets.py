@@ -7,16 +7,19 @@ Extrapolation Example
 This is a full example
 """
 
+import matplotlib
+matplotlib.use('Agg')
+
 import numpy as np
 import sunpy.map as mp
 from astropy import units as u
 
 # Module Imports
 from solarbextrapolation.classes import *
-from potential_field_extrapolator import *
-from utilities import *
-from example_data_generator import *
-from visualisation_functions import *
+from solarbextrapolation.potential_field_extrapolator import *
+from solarbextrapolation.utilities import *
+from solarbextrapolation.example_data_generator import *
+from solarbextrapolation.visualisation_functions import *
 
 # 2015
 str_folder = "C://fits//"
