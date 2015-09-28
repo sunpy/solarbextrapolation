@@ -20,7 +20,7 @@ from astropy_helpers.setup_helpers import (
 from astropy_helpers.git_helpers import get_git_devstr
 from astropy_helpers.version_helpers import generate_version_py
 
-# -- Read the Docs Setup  -----------------------------------------------------
+# -- Read the Docs Setup -------------------------------------------------------
 
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 
@@ -28,18 +28,20 @@ if on_rtd:
     os.environ['HOME'] = '/home/docs/checkouts/readthedocs.org/user_builds/sunpy/'
     os.environ['SUNPY_CONFIGDIR'] = '/home/docs/checkouts/readthedocs.org/user_builds/sunpy/'
 
+# ------------------------------------------------------------------------------
+
 # Get some values from the setup.cfg
 from distutils import config
 conf = config.ConfigParser()
 conf.read(['setup.cfg'])
 metadata = dict(conf.items('metadata'))
 
-PACKAGENAME = metadata.get('package_name', 'packagename')
-DESCRIPTION = metadata.get('description', 'Astropy affiliated package')
-AUTHOR = metadata.get('author', '')
-AUTHOR_EMAIL = metadata.get('author_email', '')
-LICENSE = metadata.get('license', 'unknown')
-URL = metadata.get('url', 'http://astropy.org')
+PACKAGENAME = metadata.get('package_name', 'solarbextrapolation')
+DESCRIPTION = metadata.get('description', 'Extrapolation framework for Solar Magnetic Fields')
+AUTHOR = metadata.get('author', 'Alex Hamilton, Stuart Mumford, The SunPy Project')
+AUTHOR_EMAIL = metadata.get('author_email', 'sunpy@googlegroups.com')
+LICENSE = metadata.get('license', 'BSD 2-Clause')
+URL = metadata.get('url', 'http://docs.sunpy.org/projects/solarbextrapolation/')
 
 # Get the long description from the package's docstring
 __import__(PACKAGENAME)
@@ -51,7 +53,7 @@ LONG_DESCRIPTION = package.__doc__
 builtins._ASTROPY_PACKAGE_NAME_ = PACKAGENAME
 
 # VERSION should be PEP386 compatible (http://www.python.org/dev/peps/pep-0386)
-VERSION = '0.0.dev'
+VERSION = '0.1.dev'
 
 # Indicates if this version is a release version
 RELEASE = 'dev' not in VERSION
@@ -112,7 +114,8 @@ setup(name=PACKAGENAME,
       version=VERSION,
       description=DESCRIPTION,
       scripts=scripts,
-      install_requires=['astropy'],
+      install_requires=['astropy',
+                        'sunpy'],
       author=AUTHOR,
       author_email=AUTHOR_EMAIL,
       license=LICENSE,
