@@ -2,5 +2,4 @@ numpy
 matplotlib
 astropy-helpers
 astropy
-sunpy
 git+https://github.com/sphinx-gallery/sphinx-gallery.git
