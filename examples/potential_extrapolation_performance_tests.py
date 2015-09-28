@@ -10,6 +10,7 @@ This tests the speed of it all.
 # General imports
 from astropy import units as u
 from astropy.table import Table
+from mayavi import mlab
 
 # Module imports
 from solarbextrapolation.classes import Map3D
