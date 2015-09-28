@@ -98,7 +98,11 @@ release = package.__version__
 extensions += ['sphinxgallery.gen_gallery']
 
 import sphinxgallery
-html_static_path = ['_static', sphinxgallery.path_static()]
+#html_static_path = ['_static', sphinxgallery.path_static()]
+sphinx_gallery_conf = {
+                       #'find_mayavi_figures': True,
+                       'doc_module': ('solarbextrapolation', 'sunpy'),
+                       'examples_dirs': ['../examples']}
 
 # -- Options for HTML output ---------------------------------------------------
 

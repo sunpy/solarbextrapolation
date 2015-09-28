@@ -72,6 +72,7 @@ def visualise(aMap3D, **kwargs):
 
     show_volume_axes : boolean, optional
         If set, enables the display of the 3D vector field axes.
+
     """
 
     # Optional parameters
@@ -85,7 +86,7 @@ def visualise(aMap3D, **kwargs):
     volume_units       = kwargs.get('volume_units', [ volume_unit, volume_unit, volume_unit ])
     show_boundary_axes = kwargs.get('show_boundary_axes', True)
     show_volume_axes   = kwargs.get('show_volume_axes', True)
-    
+
     # Setup the arc to length equivilence
     obs_distance = aMap3D.dsun - aMap3D.rsun_meters
     radian_length = [ (u.radian, u.meter, lambda x: obs_distance * x, lambda x: x / obs_distance) ]
@@ -121,9 +122,9 @@ def visualise(aMap3D, **kwargs):
     if show_volume_axes:
         # Label axes
         axes = mlab.axes()
-        x_range_axis = (x_range/volume_units[0]).decompose()
-        y_range_axis = (y_range/volume_units[1]).decompose()
-        z_range_axis = u.Quantity(z_range/volume_units[2]).decompose()
+        x_range_axis = decompose_ang_len((x_range/volume_units[0]).decompose(), equivalencies=radian_length, working_units=volume_units[0])#(x_range/volume_units[0]).decompose()
+        y_range_axis = decompose_ang_len((y_range/volume_units[1]).decompose(), equivalencies=radian_length, working_units=volume_units[1])#(y_range/volume_units[1]).decompose()
+        z_range_axis = decompose_ang_len((z_range/volume_units[2]).decompose(), equivalencies=radian_length, working_units=volume_units[2])#(z_range/volume_units[2]).decompose()
         if boo_debug:
             print '\n\n'
             print 'x_range: ' + str(x_range)
@@ -246,6 +247,7 @@ def visualise(aMap3D, **kwargs):
             axes.axes.y_label = 'Solar Y (' + unit_label(boundary_units[1]) + ')'
 
     return fig
+
 
 def unit_label(quantity):
     """
