@@ -593,11 +593,3 @@ class Map3DComparer(object):
         else:
             self.results
 
-
-
-############
-#
-#  Examples
-#
-#######
-if __name__ == '__main__':
