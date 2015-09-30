@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 """
 ==========================
-Example Data Extrapolation
+Generated Data Extrapolation
 ==========================
 
-In this example we will be generating some dummy data and demonstrating how to
-extrapolate this using the basic potential extrapolator.
+In this example you will be generating some example data and extrapolate this
+using the basic potential extrapolator.
 """
 
 ##############################################################################
