@@ -10,6 +10,10 @@ this package is here:
   self
   auto_examples/index
 
-.. automodapi:: solarbextrapolation.classes
-.. automodapi:: solarbextrapolation.potential_field_extrapolator
+.. automodapi:: solarbextrapolation.extrapolators
+.. automodapi:: solarbextrapolation.preprocessors
+.. automodapi:: solarbextrapolation.analyticalmodels
+.. automodapi:: solarbextrapolation.utilities
+.. automodapi:: solarbextrapolation.map3dclasses
+
 
