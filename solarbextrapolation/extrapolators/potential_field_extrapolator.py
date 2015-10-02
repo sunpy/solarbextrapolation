@@ -10,10 +10,10 @@ import sunpy.map as mp
 import astropy.units as u
 
 # Module Imports
-from classes import *
-from utilities import *
-from example_data_generator import *
-from visualisation_functions import *
+#from classes import *
+from ..utilities import *
+from ..example_data_generator import *
+from ..visualisation_functions import *
 
 
 __all__ = ['PotentialExtrapolator']
@@ -53,7 +53,7 @@ class PotentialExtrapolator(Extrapolators):
         then use numerical differentiation (gradient) to find the vector field
         (Bxyz).
         """
-        
+
         # We will attempt to use numba to speed up the extrapolation.
         """
         try:
@@ -64,12 +64,12 @@ class PotentialExtrapolator(Extrapolators):
         except ImportError:
             phi = self._extrapolate_phi()
         """
-        
+
         phi = self._extrapolate_phi(**kwargs)
         Bxyz = self._determine_vec(phi, debug = False, **kwargs)
 
         return Map3D(Bxyz, self.meta, xrange=self.xrange, yrange=self.yrange, zrange=self.zrange)
-    
+
     def _extrapolate_phi(self, debug=False, **kwargs):
         """
         A function to extrapolate the magnetic field above the given boundary.
@@ -83,7 +83,7 @@ class PotentialExtrapolator(Extrapolators):
         # Parameters
         arr_boundary = self.map_boundary_data.data
         enable_numba = kwargs.get('enable_numba', True)
-        
+
 
         if enable_numba:
             try:
@@ -111,19 +111,19 @@ class PotentialExtrapolator(Extrapolators):
         #return phi_extrapolation_numba(arr_boundary, self.shape, self.Dx.value, self.Dy.value, self.Dz.value)
 
 
-    def _determine_vec(self, phi, D = 1, debug = False, **kwargs): 
+    def _determine_vec(self, phi, D = 1, debug = False, **kwargs):
         """
         Create an empty 3D matrix from the output.
         ATM, for simplicity, I make the same size as the potential field, though the outer 2 layers are all 0.0.
-        """                    
+        """
         tupVolShape = phi.shape
         npmVecSpace = np.zeros((tupVolShape[0], tupVolShape[1], tupVolShape[2], 3)) # in Order XYZC (C = component directions)
 
         # For each cell we use data from 2 in each direction, this means we need to reduce the volume by 2 in eaach direction.
         for k in range(2, tupVolShape[2]-2):          # Z - Only done first so I can say when an XY slice has been rendered.
             for j in range(2, tupVolShape[1]-2):      # Y
-                for i in range(2, tupVolShape[0]-2):  # X               
-                    # 
+                for i in range(2, tupVolShape[0]-2):  # X
+                    #
                     npmVecSpace[i,j,k,0]=-(phi[i-2,j,k]-8.0*phi[i-1,j,k]+8.0*phi[i+1,j,k]-phi[i+2,j,k])/(12.0*D)
                     npmVecSpace[i,j,k,1]=-(phi[i,j-2,k]-8.0*phi[i,j-1,k]+8.0*phi[i,j+1,k]-phi[i,j+2,k])/(12.0*D)
                     npmVecSpace[i,j,k,2]=-(phi[i,j,k-2]-8.0*phi[i,j,k-1]+8.0*phi[i,j,k+1]-phi[i,j,k+2])/(12.0*D)

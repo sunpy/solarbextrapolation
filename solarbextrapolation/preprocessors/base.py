@@ -25,7 +25,7 @@ from astropy.table import Table
 import astropy.units as u
 
 # Internal imports
-from utilities import *
+from ..utilities import *
 
 class Preprocessors(object):
     """
@@ -35,10 +35,10 @@ class Preprocessors(object):
     compensate for extrapolator assumptions, such as the force-free assumption
     that is assumed in many extrapolations, but isn't true in the photosphere
     where magnetogram observations are generally taken.
-    
+
     Parameters
     ----------
-    
+
     map_data : `sunpy.map.GenericMap`
         The sunpy map containing the data to be processed.
     filepath : `string`
@@ -68,7 +68,7 @@ class Preprocessors(object):
         return map_output
 
     def preprocess(self, **kwargs):
-        
+
         """
         Method to be called to run the preprocessor.
         Times the process and saves output where applicable.
