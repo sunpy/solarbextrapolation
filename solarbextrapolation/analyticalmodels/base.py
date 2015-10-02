@@ -25,7 +25,7 @@ from astropy.table import Table
 import astropy.units as u
 
 # Internal imports
-from utilities import *
+from ..utilities import *
 
 class AnalyticalModel(object):
     """
@@ -35,11 +35,11 @@ class AnalyticalModel(object):
     """
     def __init__(self, **kwargs):
         dim = 16
-        # 
+        #
         header = {'ZNAXIS': 3, 'ZNAXIS1': dim, 'ZNAXIS2': dim, 'ZNAXIS3': dim}
         X, Y, Z = np.zeros([dim, dim, dim]), np.zeros([dim, dim, dim]), np.zeros([dim, dim, dim])
         self.field = Map3D(X, Y, Z, header)
-        
+
         magnetogram = np.zeros([dim, dim])
         magnetogram_header  = {'ZNAXIS': 2, 'ZNAXIS1': dim, 'ZNAXIS2': dim}
         self.magnetogram = sunpy.map.Map((magnetogram, magnetogram_header))
