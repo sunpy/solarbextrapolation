@@ -8,7 +8,7 @@ In this example you will be downloading boundary data from VSO, extrapolating
 using the potential extrapolator and visualising in MayaVi.
 """
 
-##############################################################################
+################################################################################
 # You start by importing the necessary modules.
 
 # General imports
@@ -21,10 +21,10 @@ import os
 
 # Module imports
 from solarbextrapolation.classes import Map3D
-from solarbextrapolation.potential_field_extrapolator import PotentialExtrapolator
+from solarbextrapolation.extrapolators import PotentialExtrapolator
 from solarbextrapolation.visualisation_functions import visualise
 
-##############################################################################
+################################################################################
 # You will retrieve the boundary data from the VSO using the SunPy VSO client.
 # In this case we will retrieve an SDO HMI line-of-sight magnetogram that was
 # made on the 14th of February 2011, as used in Sun et al (2012).
@@ -46,7 +46,7 @@ result_hmi = client.query(
 # Save the results to fits files. (Using Rice compression if possible)
 data_hmi = client.get(result_hmi, methods=('URL-FILE_Rice', 'URL-FILE')).wait()
 
-##############################################################################
+################################################################################
 # You may also decide to get the corrisponding SDO AIA data showing the EUV
 # image at the same time, this can be used to see the flux tubes for comparrison
 # to the vector field streamlines for visulisation.
@@ -63,7 +63,7 @@ result_aia = client.query(
 # Save the results to fits files. (Using Rice compression if possible)
 data_aia = client.get(result_aia, methods=('URL-FILE_Rice', 'URL-FILE')).wait()
 
-##############################################################################
+################################################################################
 # You want to crop on solar-x and solar-y the the active region of interest.
 # Likewise you want to decide on the altertude ranges to extrapolate within.
 # Extrapolators use astropy quantities for ranges, importanmtly these are
@@ -73,7 +73,7 @@ data_aia = client.get(result_aia, methods=('URL-FILE_Rice', 'URL-FILE')).wait()
 # In this case we use angular uniits (arcsec specifically) for the zrange
 # quantity, this is physically meaningless, but gives an easy way to ensure
 # your zrange is similar to teh other ranges.
-# We also want extended solar-x and solar-y ranges for plotting the 
+# We also want extended solar-x and solar-y ranges for plotting the
 
 # Cropping into the active region within the HMI map
 xrange = u.Quantity([50,    300] * u.arcsec)
@@ -84,7 +84,7 @@ zrange = u.Quantity([0,     250] * u.arcsec)
 map_hmi = mp.Map(data_hmi[0])
 map_hmi_cropped = map_hmi.submap(xrange, yrange)
 
-##############################################################################
+################################################################################
 # If your boundary data has a high resolution then you may need to resample to
 # ensure it extrapolates within a reasonable timeframe.
 
@@ -92,11 +92,11 @@ map_hmi_cropped = map_hmi.submap(xrange, yrange)
 shape = u.Quantity([20, 20] * u.pixel)
 map_hmi_cropped_resampled = map_hmi_cropped.resample(shape, method='linear')
 
-##############################################################################
+################################################################################
 # You can check the resulting generated data by using peek().
 map_hmi_cropped_resampled.peek()
 
-##############################################################################
+################################################################################
 # To speed up repeat usage of this script it will save the extrapolation output,
 # you can use os.path.isfile() to check if the file already exists, assuming it
 # doesn't you will extrapolate and create it, otherwise you load it.
@@ -108,10 +108,10 @@ if not os.path.isfile(str_vol_filepath):
     aMap3D = aPotExt.extrapolate()
 # Load the results.
 aMap3D = Map3D.load(str_vol_filepath)
-print '\nextrapolation duration: ' + str(np.round(aMap3D.meta['extrapolator_duration'],3)) + ' s\n'
+#print '\nextrapolation duration: ' + str(np.round(aMap3D.meta['extrapolator_duration'],3)) + ' s\n'
 
 
-##############################################################################
+################################################################################
 # For the perposes of visualisation we will want an extended boundary data, not
 # just that of the extrapolated region, and at the instruments full resolution,
 # not resampled.
@@ -123,7 +123,7 @@ yrangeextended = u.Quantity([ yrange.value[0] - 50, yrange.value[1] + 50 ] * yra
 map_boundary = mp.Map(data_hmi[0])
 map_boundary_cropped = map_boundary.submap(xrangeextended, yrangeextended)
 
-##############################################################################
+################################################################################
 # You can now get a quick and easy visualisation using the
 # solarbextrapolation.example_data_generator.visualise tools:
 
