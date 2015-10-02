@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-==========================
+============================
 Generated Data Extrapolation
-==========================
+============================
 
 In this example you will be generating some example data and extrapolate this
 using the basic potential extrapolator.
@@ -14,7 +14,7 @@ using the basic potential extrapolator.
 # Module imports
 from solarbextrapolation.classes import Map3D
 #from solarbextrapolation.potential_field_extrapolator import PotentialExtrapolator
-from extrapolators import PotentialExtrapolator
+from solarbextrapolation.extrapolators import PotentialExtrapolator
 from solarbextrapolation.example_data_generator import generate_example_data, dummyDataToMap
 from solarbextrapolation.visualisation_functions import visualise
 
@@ -22,7 +22,7 @@ from solarbextrapolation.visualisation_functions import visualise
 # You also need the ability to convert units and use MayaVi for visualisation.
 
 # General imports
-from astropy import units as u
+import astropy.units as u
 from mayavi import mlab
 
 ##############################################################################
