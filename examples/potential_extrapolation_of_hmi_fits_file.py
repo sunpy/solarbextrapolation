@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-Created on Mon Aug 10 11:26:13 2015
-
-@author: alex_
+===========================
+HMI FITS File Extrapolation
+===========================
 
 Example of extrapolating from a HMI fitts file using the potential
 extrapolator and visualising.
@@ -36,9 +36,9 @@ map_hmi_cropped_resampled = map_hmi_cropped.resample(dimensions, method='linear'
 # Open the map and create a cropped version for the visualisation.
 #map_boundary = mp.Map('C:\\git\\solarbextrapolation\\examples\\2011-02-14__20-35-25__02_aia.fits') # For AIA
 map_boundary = mp.Map('C:\\git\\solarbextrapolation\\examples\\2011-02-14__20-35-25__01_hmi.fits') # For HMI
-    
+
 map_boundary_cropped = map_boundary.submap(xrangeextended, yrangeextended)
-    
+
 # Only extrapolate if we don't have a saved version
 if not os.path.isfile(str_vol_filepath):
     aPotExt = PotentialExtrapolator(map_hmi_cropped_resampled, filepath=str_vol_filepath, zshape=dimensions[0].value, zrange=zrange)

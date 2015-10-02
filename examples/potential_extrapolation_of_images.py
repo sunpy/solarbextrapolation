@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Aug 20 16:16:25 2015
-
-@author: alex_
+=====================================
+Potential Extrapolation from an Image
+=====================================
 
 This example is to demonstrate using the potential extrapolator on an image.
 It was built for a bit of fun.
@@ -44,7 +44,7 @@ print str(arr_data.shape)
 print str(arr_data.dtype) + '\n'
 
 map_boundary = dummyDataToMap(arr_data, xrange, yrange)
-    
+
 # Use potential extrapolator to generate field
 aPotExt = PotentialExtrapolator(map_boundary, zshape=arr_grid_shape[2], zrange=zrange)
 aMap3D  = aPotExt.extrapolate(enable_numba=True)
