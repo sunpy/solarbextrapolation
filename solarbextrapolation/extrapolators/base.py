@@ -25,7 +25,7 @@ from astropy.table import Table
 import astropy.units as u
 
 # Internal imports
-from utilities import *
+from ..utilities import *
 
 class Extrapolators(object):
     """
@@ -36,25 +36,25 @@ class Extrapolators(object):
     The primary method to override is extrapolation(), the primary method to
     call is extrapolate() which will both call extrapolation() and save the
     result if a filepath argument is given.
-    
+
     Parameters
     ----------
-    
+
     map_magnetogram : `sunpy.map.GenericMap`
         The sunpy map containing the boundary magnetogram data.
-    
+
     filepath : `string`
         The optional filepath for automatic saving of extrapolation results.
-    
+
     notes : `string`
         The optional notes regarding thius run of the extrapolation routine.
-    
+
     extrapolator_routine : `string`
         The name for the extrapolation routine.
-    
+
     zshape : `int`
         The vertical grid size.
-    
+
     xrange : `astropy.unit.Quantity`, optional
         The x edge to edge coordinates. If defined will manually scale the
         boundary data.
@@ -62,10 +62,10 @@ class Extrapolators(object):
     yrange : `astropy.units.quantity.Quantity`, optional
         The y edge to edge coordinates. If defined will manually scale the
         boundary data.
-        
+
     zrange : `astropy.unit.Quantity`
         The vertical edge to edge coordinates for the vertical range.
-    
+
     notes : `string`
         User specified notes that will be added to the metadata.
     """
@@ -77,9 +77,9 @@ class Extrapolators(object):
         self.map_boundary_data = map_magnetogram
         self.meta = { 'boundary_1_meta': self.map_boundary_data.meta }
         self.meta['extrapolator_notes'] = kwargs.get('notes', '')
-        
+
         # Normalise the units to SI May possible be added here
-        
+
         # Crop the boundary data if required.
         self.xrange = kwargs.get('xrange', self.map_boundary_data.xrange)
         self.yrange = kwargs.get('yrange', self.map_boundary_data.yrange)
@@ -109,18 +109,18 @@ class Extrapolators(object):
 
     def _to_SI(self, **kwargs):
         """
-        
+
         """
         # Scale the x/y ranges
         # Setup the equivilence
         obs_distance = self.map_boundary_data.dsun - self.map_boundary_data.rsun_meters
         radian_length = [ (u.radian, u.meter, lambda x: obs_distance * x, lambda x: x / obs_distance) ]
-        
+
         # Extract the maps x/yrange values and convert to length units
         #x_range = self.map_boundary_data.xrange
         #x_range = ( decompose_ang_len(x_range[0], equivalencies=radian_length),
         #            decompose_ang_len(x_range[1], equivalencies=radian_length) )
-        #x_range = 
+        #x_range =
         #y_range = self.map_boundary_data.yrange
         """
         x_range = self.map_boundary_data.xrange.to(u.meter, equivalencies=radian_length)
@@ -147,14 +147,14 @@ class Extrapolators(object):
         # Add some type checking, we want a map object, check for .unit attribute.
         # Extrapolation code goes here.
         arr_4d = np.zeros([self.map_boundary_data.data.shape[0], self.map_boundary_data.data.shape[1], 1, 3])
-        
+
         # Calculate the ranges in each dimension in length units (meters)
         x_range = self._angle_to_length(self.xrange)
         y_range = self._angle_to_length(self.yrange)
         z_range = self.zrange
-        
+
         map_output = Map3D( arr_4d, self.meta, xrange=x_range, yrange=y_range, zrange=z_range, xobsrange=self.xobsrange, yobsrange=self.yobsrange )
-        
+
         return map_output
 
     def extrapolate(self, **kwargs):
