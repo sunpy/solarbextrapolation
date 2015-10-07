@@ -69,6 +69,7 @@ for extrapolation in lis_datasets:
 # Show the data table
 print t
 
+
 # Visualise
 visualise(aMap3D,
           boundary=lis_datasets.pop()[3],

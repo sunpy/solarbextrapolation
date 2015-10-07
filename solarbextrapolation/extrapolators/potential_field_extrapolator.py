@@ -11,9 +11,9 @@ import astropy.units as u
 
 # Module Imports
 #from classes import *
-from ..utilities import *
-from ..example_data_generator import *
-from ..visualisation_functions import *
+#from solarbextrapolation.utilities import *
+from solarbextrapolation.extrapolators import Extrapolators
+#from solarbextrapolation.visualisation_functions import visualise
 
 
 __all__ = ['PotentialExtrapolator']
@@ -131,29 +131,4 @@ class PotentialExtrapolator(Extrapolators):
                 print '(Bx,By,Bz) calculated for layer ' + str(k) + '.'
 
         return npmVecSpace
-
-if __name__ == '__main__':
-    #aMap2D = sunpy.map.Map('C://git/solarextrapolation/solarextrapolation/data/example_data_(10x10)__01_hmi.fits')
-    str_folder = 'C://fits//'
-    str_dataset = 'temp5'
-    #str_dataset = '2011-02-14__20-35-25__01_hmi'
-    str_extrapolation = str_dataset + '_3Dmap.m3d'
-    str_boundary = str_dataset + '.fits'
-
-
-    aMap2D = mp.Map(str_folder + str_boundary)
-
-    if not os.path.isfile(str_extrapolation):
-        aPotExt = PotentialExtrapolator(aMap2D, filepath=str_extrapolation, zshape=50, zrange=u.Quantity([0, 15] * u.Mm))
-        aMap3D = aPotExt.extrapolate()
-    aMap3D = Map3D.load(str_folder + str_extrapolation)
-    #print '\n\n'
-    #print aMap3D.xrange
-    #print aMap3D.yrange
-    #print aMap3D.zrange
-
-
-    # Visualise this
-    visualise(aMap3D, boundary=aMap2D, scale=1.0*u.Mm, boundary_unit=1.0*u.arcsec, show_boundary_axes=False, show_volume_axes=True, debug=False)
-    mlab.show()
 

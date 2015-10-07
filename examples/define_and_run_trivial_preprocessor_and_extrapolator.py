@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 """
 ==============================
-Defining a Custom Extrapolator
+Defining a Custom Preprocessor and Extrapolator
 ==============================
 
-Some basic examples of using the extrapolation API.
+Here you will be creating trivial preprocessor and and exztrqapolatoirs
+following the API.
 """
 
 

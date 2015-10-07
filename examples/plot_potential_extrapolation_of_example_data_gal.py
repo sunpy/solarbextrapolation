@@ -12,7 +12,7 @@ using the basic potential extrapolator.
 # You can start by importing the necessary module components.
 
 # Module imports
-from solarbextrapolation.classes import Map3D
+from solarbextrapolation.map3dclasses import Map3D
 #from solarbextrapolation.potential_field_extrapolator import PotentialExtrapolator
 from solarbextrapolation.extrapolators import PotentialExtrapolator
 from solarbextrapolation.example_data_generator import generate_example_data, dummyDataToMap

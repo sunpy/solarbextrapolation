@@ -17,8 +17,9 @@ from mayavi_seed_streamlines import SeedStreamline, Streamline
 from mayavi.tools.sources import vector_field
 
 # Module Imports
-from classes import *
-from utilities import *
+#from classes import *
+#from solarbextrapolation.map3dclasses import Map3D
+from solarbextrapolation.utilities import decompose_ang_len
 
 def visualise(aMap3D, **kwargs):
     """
@@ -252,59 +253,3 @@ def unit_label(quantity):
         return str(quantity.unit)
     return str(quantity)
 
-
-if __name__ == '__main__':
-    # 2015
-    str_folder = "C://Users//alex_//Dropbox//Shared Folders//Stuart Mumford//data//"
-    str_map_filepath = str_folder + "2015-01-04__19-41-12__02_aia.fits"
-    str_map_filepath = str_folder + "2015-01-04__19-41-12__01_hmi.fits"
-    str_vol_filepath = str_folder + "2015-01-04__19-41-12__02_Bxyz.npy"
-    lis_cropping = [[-200,200],[-250,150],[0,400], 'data']
-
-    # 2014
-    str_map_filepath = str_folder + "2014-01-06__07-28-36__02_aia.fits"
-    str_map_filepath = str_folder + "2014-01-06__07-28-36__01_hmi.fits"
-    str_vol_filepath = str_folder + "2014-01-06__07-28-36__02_Bxyz.npy"
-    lis_cropping = [[-550,-200],[-245,105],[0,300], 'data']
-
-    # 2011
-    str_map_filepath = str_folder + "2011-02-14__20-35-25__02_aia"
-    str_map_filepath = str_folder + "2011-02-14__20-35-25__01_hmi.fits"
-    str_vol_filepath = str_folder + "2011-02-14__20-35-25__02_Bxyz.npy"
-    lis_cropping = [[50,300],[-350,-100],[0,250], 'data']
-
-    # Open the map and create a cropped version for the visualisation.
-    aMap2D = mp.Map(str_map_filepath)
-    aMap2D_cropped = aMap2D.submap(lis_cropping[0] * u.arcsec, lis_cropping[1] * u.arcsec)
-    aMap2D = aMap2D.submap([lis_cropping[0][0] - 50, lis_cropping[0][1] + 50] * u.arcsec, [lis_cropping[1][0] - 50, lis_cropping[1][1] + 50] * u.arcsec)
-
-    # Observational ranges are from the boundary data
-    x_obs_range = aMap2D_cropped.xrange
-    y_obs_range = aMap2D_cropped.yrange
-
-    # Setup the arc to length equivilence
-    obs_distance = aMap2D_cropped.dsun - aMap2D_cropped.rsun_meters
-    radian_length = [ (u.radian, u.meter, lambda x: obs_distance * x, lambda x: x / obs_distance) ]
-
-    # MayaVi scale and origin details
-    scale_length = 1.0 * u.Mm
-    origin_x = aMap2D_cropped.xrange[0].to(u.meter, equivalencies=radian_length)
-    origin_y = aMap2D_cropped.yrange[0].to(u.meter, equivalencies=radian_length)
-    origin = u.Quantity([ origin_x, origin_y, 0.0 * u.meter ])
-
-    # Getting the ranges. x/y from the boundary, z is defined manually.
-    x_range = aMap2D_cropped.xrange.to(u.meter, equivalencies=radian_length)
-    x_range = u.Quantity([ x_range[0] - origin[0], x_range[1] - origin[0] ])
-    y_range = aMap2D_cropped.yrange.to(u.meter, equivalencies=radian_length)
-    y_range = u.Quantity([ y_range[0] - origin[1], y_range[1] - origin[1] ])
-    z_range = x_range
-
-    # Vector field as a 3D map
-    a4DArray = np.load(str_vol_filepath)
-    aMetaDict = { 'file': 'test SunPy Map object' }
-    aMap3D = Map3D(a4DArray, aMetaDict, xrange=x_range, yrange=y_range, zrange=z_range, xobsrange=x_obs_range, yobsrange=y_obs_range)
-
-    #visualise(aMap3D, boundary=aMap2D, scale=1.0*u.Mm, boundary_units=1.0*u.arcsec, show_volume_axes=False)
-    seeds = np.array([[4,4,2], [-4,4,2], [4,-4,2], [-4,-4,2], [2,2,2], [-2,2,2], [2,-2,2], [-2,-2,2]])
-    seeds = None
-    visualise(aMap3D, boundary=aMap2D, seeds=seeds, scale=1.0*u.Mm, boundary_unit=1.0*u.arcsec, show_boundary_axes=False, show_volume_axes=True, origin=origin, debug=True)
