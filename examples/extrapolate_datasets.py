@@ -13,6 +13,7 @@ matplotlib.use('Agg')
 import numpy as np
 import sunpy.map as mp
 from astropy import units as u
+from mayavi import mlab
 
 # Module Imports
 from solarbextrapolation.classes import *
@@ -68,3 +69,4 @@ aMap3D = Map3D.load(str_vol_filepath)
 
 # Visualise this
 visualise(aMap3D, boundary=aMap2D_visulisation, scale=1.0*u.Mm, boundary_unit=1.0*u.arcsec, show_boundary_axes=False, show_volume_axes=True, debug=False)
+mlab.show()
