@@ -5,12 +5,6 @@ Created on Mon Jul 27 14:39:00 2015
 @author: alex_
 """
 
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Jun 24 18:45:05 2015
-
-@author: alex_
-"""
 
 # Universal Imports
 import numpy as np
