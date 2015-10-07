@@ -11,6 +11,9 @@ import sunpy.map
 
 
 #aNewMap3D = Map3D()
+#from solarbextrapolation.map3dclasses import Map3D
+from solarbextrapolation.preprocessors import Preprocessors
+from solarbextrapolation.extrapolators import Extrapolators
 
 # Testing a preprocessor
 class PreZeros(Preprocessors):

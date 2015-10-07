@@ -14,7 +14,10 @@ from astropy import units as u
 
 import sunpy.map
 
-from ..classes import *
+#from ..classes import *
+from solarbextrapolation.map3dclasses import Map3D#, Map3DCube
+from solarbextrapolation.preprocessors import Preprocessors
+from solarbextrapolation.extrapolators import Extrapolators
 
 # Tests for the map3D class
 

@@ -25,7 +25,7 @@ from astropy.table import Table
 import astropy.units as u
 
 # Internal imports
-from ..utilities import *
+#from solarbextrapolation.utilities import *
 
 class Preprocessors(object):
     """

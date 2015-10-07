@@ -25,7 +25,8 @@ from astropy.table import Table
 import astropy.units as u
 
 # Internal imports
-from ..utilities import *
+#from solarbextrapolation.utilities import *
+from solarbextrapolation.map3dclasses import Map3D
 
 class Extrapolators(object):
     """
