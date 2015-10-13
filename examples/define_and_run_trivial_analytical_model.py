@@ -1,36 +1,37 @@
 # -*- coding: utf-8 -*-
 """
-Created on Wed Sep 30 13:45:13 2015
+==============================
+Defining a Custom Preprocessor and Extrapolator
+==============================
 
-@author: alex_
+Here you will be creating trivial preprocessor and and exztrqapolatoirs
+following the API.
 """
 
-# SunPy imports
-import sunpy.map
+# Internal imports
+#from solarbextrapolation.utilities import si_this_map
+from solarbextrapolation.analyticalmodel import AnalyticalModel
 
-
-
-#aNewMap3D = Map3D()
-#from solarbextrapolation.map3dclasses import Map3D
-from solarbextrapolation.preprocessors import Preprocessors
-from solarbextrapolation.extrapolators import Extrapolators
-
+###########################################################################
 # Testing a preprocessor
-class PreZeros(Preprocessors):
-    def __init__(self, map_magnetogram):
-        super(PreZeros, self).__init__(map_magnetogram)
+
+# Define a trivial AnalyticalModel
+class allOnes(AnalyticalModel):
+    def __init__(self):
+        super(self).__init__()
 
     def _preprocessor(self):
         # Adding in custom parameters to the meta
         self.meta['preprocessor_routine'] = 'Zeros Preprocessor'
-        
-        # Creating the trivial zeros map of the shape of the input map
-        map_output = sunpy.map.Map((np.zeros(self.map_input.data.shape), 
-                                    self.meta))
-        
+
+        # Creating the trivial zeros map of the same shape as the input map
+        map_output = sunpy.map.Map((np.zeros(self.map_input.data.shape),
+                                        self.meta))
+
         # Outputting the map.
         return map_output
 
+# Generate the boundary
 aMap2D = sunpy.map.Map('C://git//solarextrapolation//solarextrapolation//data//example_data_(100x100)__01_hmi.fits')
 aPrePro = PreZeros(aMap2D.submap([0,10], [0,10]))
 aPreProData = aPrePro.preprocess()
@@ -42,9 +43,10 @@ aPreProData = aPrePro.preprocess()
 #aPreProData.meta['preprocessor_routine']
 #aPreProData.meta['preprocessor_start_time']
 
-
+###########################################################################
 # Testing an extrapolator
 
+# Define trivial extrapolator
 class ExtZeros(Extrapolators):
     def __init__(self, map_magnetogram, **kwargs):
         super(ExtZeros, self).__init__(map_magnetogram, **kwargs)
@@ -73,7 +75,3 @@ aMapCube[0].data
 aMapCube[0].meta
 aMapCube[1].data
 aMapCube[1].meta
-
-
-#class Greens_Potential(Extrapolators):
-#    super(Extrapolators, self).__init__(map_magnetogram)

@@ -17,7 +17,8 @@ import sunpy.map
 #from ..classes import *
 from solarbextrapolation.map3dclasses import Map3D#, Map3DCube
 from solarbextrapolation.preprocessors import Preprocessors
-from solarbextrapolation.extrapolators import Extrapolators
+from solarbextrapolation.extrapolators import Extrapolators, PotentialExtrapolator
+
 
 # Tests for the map3D class
 
@@ -47,6 +48,7 @@ def text_load_Map3d(text_save_Map3d):
     # Compare the returned data array
     assert (aMap3D.data == np.zeros((2,2,2,2))).all()
 
+
 # Tests for the preprocessor class
 
 @pytest.fixture
@@ -70,7 +72,6 @@ def test_create_extrapolator():
 
 def test_extrapolator_extrapolate_method(test_create_extrapolator):
     test_create_extrapolator.extrapolate()
-
 
 def test_create_and_run_preprocessor_subclass():
     # Define the preprocessor as a child of the Preprocessors class
@@ -96,6 +97,8 @@ def test_create_and_run_preprocessor_subclass():
     aPrePro = PreZeros(aMap2D.submap([0,10]*u.arcsec, [0,10]*u.arcsec))
     aPreProData = aPrePro.preprocess()
 
+	
+# Tests for the extrapolator class
 
 def test_create_and_run_extrapolator_subclass():
     # Define the extrapolator as a child of the Extrapolators class
@@ -121,10 +124,24 @@ def test_create_and_run_extrapolator_subclass():
     aMap3D = aExt.extrapolate()
     assert os.path.isfile(afilename)
 
+# Tests for the extrapolator.PotentialExtrapolator class
 
+def test_potential_extrapolator_subclass():
+    # Parameters for the extrapolator
+    xrange = u.Quantity([50,    300] * u.arcsec)
+    yrange = u.Quantity([-350, -100] * u.arcsec)
+    zrange = u.Quantity([0,     250] * u.arcsec)
+    shape = u.Quantity([5, 5, 5] * u.pixel)
 
-
-
-
+    # Load HMI map (from fits file) then submap and resample.
+    map_boundary = sunpy.map.Map('..//data//sdo-hmi_2011-02-14_20-34-12.fits')
+    map_boundary = map_boundary.submap(xrange, yrange).resample(shape[0:2], method='linear')
+    
+    # Extrapolate using python native code
+    aPotExt = PotentialExtrapolator(map_boundary, zshape=shape[2].value, zrange=zrange)
+    aMap3D = aPotExt.extrapolate(enable_numba=False)
+    
+    # Extrapolate using numba
+    aMap3D = aPotExt.extrapolate()
 
 
