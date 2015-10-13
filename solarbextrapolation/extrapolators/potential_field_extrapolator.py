@@ -13,6 +13,8 @@ import astropy.units as u
 #from classes import *
 #from solarbextrapolation.utilities import *
 from solarbextrapolation.extrapolators import Extrapolators
+from solarbextrapolation.utilities import si_this_map
+from solarbextrapolation.map3dclasses import Map3D
 #from solarbextrapolation.visualisation_functions import visualise
 
 

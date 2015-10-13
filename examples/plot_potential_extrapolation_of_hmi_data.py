@@ -20,7 +20,7 @@ from mayavi import mlab
 import os
 
 # Module imports
-from solarbextrapolation.classes import Map3D
+from solarbextrapolation.map3dclasses import Map3D
 from solarbextrapolation.extrapolators import PotentialExtrapolator
 from solarbextrapolation.visualisation_functions import visualise
 
@@ -104,6 +104,7 @@ map_hmi_cropped_resampled.peek()
 # Only extrapolate if we don't have a saved version
 str_vol_filepath = data_hmi[0][0:-5] + '_Bxyz.npy'
 if not os.path.isfile(str_vol_filepath):
+    # Create the potential extrapolator and run the extrapolate method.
     aPotExt = PotentialExtrapolator(map_hmi_cropped_resampled, filepath=str_vol_filepath, zshape=20, zrange=zrange)
     aMap3D = aPotExt.extrapolate()
 # Load the results.
