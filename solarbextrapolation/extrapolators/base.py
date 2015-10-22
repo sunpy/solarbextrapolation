@@ -154,6 +154,7 @@ class Extrapolators(object):
         y_range = self._angle_to_length(self.yrange)
         z_range = self.zrange
 
+        # Turn the 4D array into a Map3D object.
         map_output = Map3D( arr_4d, self.meta, xrange=x_range, yrange=y_range, zrange=z_range, xobsrange=self.xobsrange, yobsrange=self.yobsrange )
 
         return map_output
@@ -163,15 +164,18 @@ class Extrapolators(object):
         Method to be called to run the extrapolation.
         Times and saves the extrapolation where applicable.
         """
+        # Record the time and duration of the extrapolation.
         dt_start = datetime.now()
         tim_start = time.time()
         arr_output = self._extrapolation(**kwargs)
         tim_duration = time.time() - tim_start
 
+        # Add the duration and time to the meta/header data.
         arr_output.meta['extrapolator_start_time'] = dt_start.isoformat()
         arr_output.meta['extrapolator_duration'] = tim_duration
         arr_output.meta['extrapolator_duration_unit'] = u.s
-
+        
+        # Save the Map3D if a filepath has been set. (to avoid loosing work)
         if self.filepath:
             arr_output.save(self.filepath)
         return arr_output
