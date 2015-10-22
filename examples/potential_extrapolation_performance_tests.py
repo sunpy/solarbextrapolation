@@ -11,15 +11,15 @@ This tests the speed of it all.
 from astropy import units as u
 from astropy.table import Table
 from mayavi import mlab
+import numpy as np
 
 # Module imports
-from solarbextrapolation.classes import Map3D
-from solarbextrapolation.potential_field_extrapolator import PotentialExtrapolator
+from solarbextrapolation.extrapolators import PotentialExtrapolator
 from solarbextrapolation.example_data_generator import generate_example_data, dummyDataToMap
 from solarbextrapolation.visualisation_functions import visualise
 
 # The input parameters:
-lis_grid_shapes = [ [ 10, 10, 10 ] ]#, [ 20, 20, 20 ]]#, [ 30, 30, 30 ]]#, [ 100, 100, 100 ]]#[ 10, 10, 10 ],[ 50, 50, 50 ], [ 100, 100, 100 ], [ 200, 200, 200 ] ]
+lis_grid_shapes = [ [ 20, 20, 20 ] ]#, [ 20, 20, 20 ]]#, [ 30, 30, 30 ]]#, [ 100, 100, 100 ]]#[ 10, 10, 10 ],[ 50, 50, 50 ], [ 100, 100, 100 ], [ 200, 200, 200 ] ]
 xrange = u.Quantity([ -10.0, 10.0 ] * u.arcsec)
 yrange = u.Quantity([ -10.0, 10.0 ] * u.arcsec)
 zrange = u.Quantity([ 0,     20.0 ] * u.arcsec)
@@ -44,7 +44,7 @@ lis_datasets = []
 for shape in lis_grid_shapes:
     lis_datasets.append([ str(shape), shape[2], zrange,
                           dummyDataToMap(generate_example_data(shape[0:2], xrange, yrange, arrA0, arrA1, arrA2, arrA3), xrange, yrange) ])
-int_trials = 3 # The times to repeat each extrapolation.
+int_trials = 2 # The times to repeat each extrapolation.
 
 # Iterate through the extrapolations
 for extrapolation in lis_datasets:
@@ -68,6 +68,7 @@ for extrapolation in lis_datasets:
 
 # Show the data table
 print t
+print '\n\n'
 
 
 # Visualise

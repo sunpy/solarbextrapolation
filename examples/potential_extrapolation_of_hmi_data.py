@@ -16,7 +16,7 @@ from mayavi import mlab
 import os
 
 # Module imports
-from solarbextrapolation.classes import Map3D
+from solarbextrapolation.map3dclasses import Map3D
 from solarbextrapolation.potential_field_extrapolator import PotentialExtrapolator
 from solarbextrapolation.visualisation_functions import visualise
 
