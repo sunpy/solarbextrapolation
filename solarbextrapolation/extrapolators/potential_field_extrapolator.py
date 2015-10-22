@@ -48,7 +48,7 @@ class PotentialExtrapolator(Extrapolators):
         self.Dy = (self.yrange[1] - self.yrange[0]) / self.shape[1]
         self.Dz = (self.zrange[1] - self.zrange[0]) / self.shape[2]
 
-    def _extrapolation(self, **kwargs):
+    def _extrapolation(self, enable_numba=True, **kwargs):
         """
         Override the primary execution method from the extrapolation class.
         The process is to extrapolate the potential (scalar) field (phi) and
@@ -56,23 +56,28 @@ class PotentialExtrapolator(Extrapolators):
         (Bxyz).
         """
 
-        # We will attempt to use numba to speed up the extrapolation.
-        """
-        try:
-            from numba import double
-            from numba.decorators import jit, autojit
-            #phi_extrapolation_numba = autojit(phi_extrapolation_python)
-            phi = autojit(self._extrapolate_phi())
-        except ImportError:
-            phi = self._extrapolate_phi()
-        """
+        if enable_numba:
+            # Test that numba and the numba'ed extrpolator can be imported
+            try:
+                import numba
+                from potential_field_extrapolator_numba import phi_extrapolation_numba
+            except ImportError:
+                enable_numba = False
 
-        phi = self._extrapolate_phi(**kwargs)
-        Bxyz = self._determine_vec(phi, debug = False, **kwargs)
+        phi = self._extrapolate_phi(enable_numba, **kwargs)
+
+        if enable_numba:
+            from numba.decorators import autojit
+            determine_vec = autojit(self._determine_vec)
+        else:
+            determine_vec = self._determine_vec
+
+        npmVecSpace = np.zeros(list(phi.shape)+[3]) # in Order XYZC (C = component directions)
+        Bxyz = determine_vec(phi, 1, npmVecSpace)
 
         return Map3D(Bxyz, self.meta, xrange=self.xrange, yrange=self.yrange, zrange=self.zrange)
 
-    def _extrapolate_phi(self, debug=False, **kwargs):
+    def _extrapolate_phi(self, enable_numba, debug=False, **kwargs):
         """
         A function to extrapolate the magnetic field above the given boundary.
         Assumes the input B-field boundary data is near normal (the image must
@@ -88,49 +93,29 @@ class PotentialExtrapolator(Extrapolators):
 
 
         if enable_numba:
-            try:
-                import numba
-                from potential_field_extrapolator_numba import *
-                return phi_extrapolation_numba(arr_boundary, self.shape, self.Dx.value, self.Dy.value, self.Dz.value)
-            except ImportError:
-                pass
-        from potential_field_extrapolator_python import *
-        return phi_extrapolation_python(arr_boundary, self.shape, self.Dx.value, self.Dy.value, self.Dz.value)
-        """
-        try:
-            import numba
-            from potential_field_extrapolator_numba import *
-            return phi_extrapolation_numba(arr_boundary, self.shape, self.Dx.value, self.Dy.value, self.Dz.value)
-        except ImportError:
-            from potential_field_extrapolator_python import *
-            return phi_extrapolation_python(arr_boundary, self.shape, self.Dx.value, self.Dy.value, self.Dz.value)
-        """
-        # Now return the volume.
-        #return self._phi_extrapolation_python(arr_boundary) #np.empty((1, 1, 1), dtype=np.float)
-        #from potential_field_extrapolator_python import *
-        #return phi_extrapolation_python(arr_boundary, self.shape, self.Dx.value, self.Dy.value, self.Dz.value)
-        #from potential_field_extrapolator_numba import *
-        #return phi_extrapolation_numba(arr_boundary, self.shape, self.Dx.value, self.Dy.value, self.Dz.value)
+            from .potential_field_extrapolator_numba import phi_extrapolation_numba as phi_extrapolation
+        else:
+            from .potential_field_extrapolator_python import phi_extrapolation_python as phi_extrapolation
+
+        return phi_extrapolation(arr_boundary, self.shape, self.Dx.value, self.Dy.value, self.Dz.value)
 
 
-    def _determine_vec(self, phi, D = 1, debug = False, **kwargs):
+    # Make this a static method so it is more efficient to numba
+    @staticmethod
+    def _determine_vec(phi, D, npmVecSpace):
         """
         Create an empty 3D matrix from the output.
         ATM, for simplicity, I make the same size as the potential field, though the outer 2 layers are all 0.0.
         """
-        tupVolShape = phi.shape
-        npmVecSpace = np.zeros((tupVolShape[0], tupVolShape[1], tupVolShape[2], 3)) # in Order XYZC (C = component directions)
+        tupVolShape = npmVecSpace.shape
 
         # For each cell we use data from 2 in each direction, this means we need to reduce the volume by 2 in eaach direction.
         for k in range(2, tupVolShape[2]-2):          # Z - Only done first so I can say when an XY slice has been rendered.
             for j in range(2, tupVolShape[1]-2):      # Y
                 for i in range(2, tupVolShape[0]-2):  # X
-                    #
                     npmVecSpace[i,j,k,0]=-(phi[i-2,j,k]-8.0*phi[i-1,j,k]+8.0*phi[i+1,j,k]-phi[i+2,j,k])/(12.0*D)
                     npmVecSpace[i,j,k,1]=-(phi[i,j-2,k]-8.0*phi[i,j-1,k]+8.0*phi[i,j+1,k]-phi[i,j+2,k])/(12.0*D)
                     npmVecSpace[i,j,k,2]=-(phi[i,j,k-2]-8.0*phi[i,j,k-1]+8.0*phi[i,j,k+1]-phi[i,j,k+2])/(12.0*D)
-            if debug and k%int(tupVolShape[2]*0.1) is 0:
-                print '(Bx,By,Bz) calculated for layer ' + str(k) + '.'
 
         return npmVecSpace
 
