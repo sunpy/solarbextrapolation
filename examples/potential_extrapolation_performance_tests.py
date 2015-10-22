@@ -10,13 +10,11 @@ This tests the speed of it all.
 # General imports
 from astropy import units as u
 from astropy.table import Table
-from mayavi import mlab
 import numpy as np
 
 # Module imports
 from solarbextrapolation.extrapolators import PotentialExtrapolator
 from solarbextrapolation.example_data_generator import generate_example_data, dummyDataToMap
-from solarbextrapolation.visualisation_functions import visualise
 
 # The input parameters:
 lis_grid_shapes = [ [ 20, 20, 20 ] ]#, [ 20, 20, 20 ]]#, [ 30, 30, 30 ]]#, [ 100, 100, 100 ]]#[ 10, 10, 10 ],[ 50, 50, 50 ], [ 100, 100, 100 ], [ 200, 200, 200 ] ]
@@ -71,12 +69,3 @@ print t
 print '\n\n'
 
 
-# Visualise
-visualise(aMap3D,
-          boundary=lis_datasets.pop()[3],
-          volume_units=[1.0*u.arcsec, 1.0*u.arcsec, 1.0*u.Mm],
-          show_boundary_axes=False,
-          boundary_units=[1.0*u.arcsec, 1.0*u.arcsec],
-          show_volume_axes=True,
-          debug=False)
-mlab.show()
