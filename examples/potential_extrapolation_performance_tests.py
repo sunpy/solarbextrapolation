@@ -17,7 +17,7 @@ from solarbextrapolation.extrapolators import PotentialExtrapolator
 from solarbextrapolation.example_data_generator import generate_example_data, dummyDataToMap
 
 # The input parameters:
-lis_grid_shapes = [ [ 20, 20, 20 ] ]#, [ 20, 20, 20 ]]#, [ 30, 30, 30 ]]#, [ 100, 100, 100 ]]#[ 10, 10, 10 ],[ 50, 50, 50 ], [ 100, 100, 100 ], [ 200, 200, 200 ] ]
+lis_grid_shapes = [ [ 30, 30, 30 ] ]#, [ 20, 20, 20 ]]#, [ 30, 30, 30 ]]#, [ 100, 100, 100 ]]#[ 10, 10, 10 ],[ 50, 50, 50 ], [ 100, 100, 100 ], [ 200, 200, 200 ] ]
 xrange = u.Quantity([ -10.0, 10.0 ] * u.arcsec)
 yrange = u.Quantity([ -10.0, 10.0 ] * u.arcsec)
 zrange = u.Quantity([ 0,     20.0 ] * u.arcsec)
@@ -33,7 +33,8 @@ lis_maps = []
 lis_extrapolators = []
 
 # A table for storing the data
-t = Table(names=('grid size', 'time (ave)', 'time (std)'), meta={'name': 'times tables'}, dtype=('S24', 'f8', 'f8'))
+t = Table(names=('grid size', 'time (min)', 'time (ave)', 'time (std)'), meta={'name': 'times tables'}, dtype=('S24', 'f8', 'f8', 'f8'))
+t['time (min)'].unit = u.s
 t['time (ave)'].unit = u.s
 t['time (std)'].unit = u.s
 
@@ -42,7 +43,7 @@ lis_datasets = []
 for shape in lis_grid_shapes:
     lis_datasets.append([ str(shape), shape[2], zrange,
                           dummyDataToMap(generate_example_data(shape[0:2], xrange, yrange, arrA0, arrA1, arrA2, arrA3), xrange, yrange) ])
-int_trials = 1 # The times to repeat each extrapolation.
+int_trials = 3 # The times to repeat each extrapolation.
 
 # Iterate through the extrapolations
 for extrapolation in lis_datasets:
@@ -56,13 +57,13 @@ for extrapolation in lis_datasets:
     for i in range(0, int_trials):
         aMap3D = aPotExt.extrapolate(enable_numba=False)
         lis_times.append(aMap3D.meta['extrapolator_duration'])
-    t.add_row([extrapolation[0], np.round(np.average(lis_times), 2), np.round(np.std(lis_times), 2)])
+    t.add_row([extrapolation[0], np.round(np.min(lis_times), 2), np.round(np.average(lis_times), 2), np.round(np.std(lis_times), 2)])
 
     # Run the extrapolation with numba for each dataset (map and ranges).
     for i in range(0, int_trials):
         aMap3D = aPotExt.extrapolate(enable_numba=True)
         lis_times.append(aMap3D.meta['extrapolator_duration'])
-    t.add_row(['(numba)'+extrapolation[0], np.round(np.average(lis_times), 2), np.round(np.std(lis_times), 2)])
+    t.add_row(['(numba)'+extrapolation[0], np.round(np.min(lis_times), 2), np.round(np.average(lis_times), 2), np.round(np.std(lis_times), 2)])
 
 # Show the data table
 print t
