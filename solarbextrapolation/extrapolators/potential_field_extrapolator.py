@@ -89,9 +89,8 @@ class PotentialExtrapolator(Extrapolators):
 
         # Parameters
         arr_boundary = self.map_boundary_data.data
-        enable_numba = kwargs.get('enable_numba', True)
 
-
+        print(enable_numba)
         if enable_numba:
             from .potential_field_extrapolator_numba import phi_extrapolation_numba as phi_extrapolation
         else:
