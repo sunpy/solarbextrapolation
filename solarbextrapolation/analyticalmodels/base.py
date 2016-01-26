@@ -23,6 +23,7 @@ from sunpy.sun import constants, sun
 from sunpy.time import parse_time, is_time
 from astropy.table import Table
 import astropy.units as u
+from mayavi import mlab
 
 # Internal imports
 #from solarbextrapolation.utilities import si_this_map
@@ -36,7 +37,7 @@ class AnalyticalModel(object):
     """
     def __init__(self, **kwargs):
         # Default grid shape and physical ranges for the volume the model covers.
-        self.shape = kwargs.get('shape', u.Quantity([5, 5, 5] * u.pixel)) # (x,y,z)
+        self.shape  = kwargs.get('shape', u.Quantity([5, 5, 5] * u.pixel)) # (x,y,z)
         self.xrange = kwargs.get('xrange', u.Quantity([-10, 10] * u.Mm))
         self.yrange = kwargs.get('yrange', u.Quantity([-10, 10] * u.Mm))
         self.yrange = kwargs.get('zrange', u.Quantity([0, 20] * u.Mm))
@@ -79,12 +80,12 @@ class AnalyticalModel(object):
         # Record the time and duration of the extrapolation.
         dt_start = datetime.now()
         tim_start = time.time()
-        arr_output = self._extrapolation(**kwargs)
+        arr_output = self._generate_field(**kwargs)
         tim_duration = time.time() - tim_start
         
         # Add the duration and time to the meta/header data.
-        arr_output.meta['extrapolator_start_time'] = dt_start.isoformat()
-        arr_output.meta['extrapolator_duration'] = tim_duration
+        arr_output.meta['extrapolator_start_time']    = dt_start.isoformat()
+        arr_output.meta['extrapolator_duration']      = tim_duration
         arr_output.meta['extrapolator_duration_unit'] = u.s
 
         # Save the Map3D if a filepath has been set. (to avoid loosing work)
@@ -120,9 +121,9 @@ class AnalyticalModel(object):
 if __name__ == '__main__':
     # User-specified parameters
     tup_shape = ( 20, 20, 20 )
-    x_range = ( -80.0, 80 ) * u.Mm
-    y_range = ( -80.0, 80 ) * u.Mm
-    z_range =  ( 0.0, 120 ) * u.Mm
+    x_range   = ( -80.0, 80 ) * u.Mm
+    y_range   = ( -80.0, 80 ) * u.Mm
+    z_range   =  ( 0.0, 120 ) * u.Mm
     
     # Derived parameters (make SI where applicable)
     x_0 = x_range[0].to(u.m).value
@@ -142,15 +143,33 @@ if __name__ == '__main__':
     # Define the extrapolator as a child of the Extrapolators class
     class AnaZeros(AnalyticalModel):
         def __init__(self, **kwargs):
-            super(self).__init__(**kwargs)
+            super(AnalyticalModel, self).__init__(**kwargs)
 
-
-        def _generate_field(self):
-            # Adding in custom parameters to the meta
+        def _generate_field(self, **kwargs):
+            # Adding in custom parameters to the metadata
             self.meta['analytical_model_routine'] = 'Zeros Model'
-
-            arr_4d = np.zeros([self.map_boundary_data.data.shape[0], self.map_boundary_data.data.shape[0], self.z, 3])
+            
+            # Generate a trivial field and return
+            arr_4d = np.zeros(self.shape)
             return Map3D( arr_4d, self.meta )
+    
+    
+    # Setup an anylitical model
+    xrange = u.Quantity([50,    300] * u.arcsec)
+    yrange = u.Quantity([-350, -100] * u.arcsec)
+    zrange = u.Quantity([0,     250] * u.arcsec)
+
+    aAnaMod = AnaZeros()
+    aMap3D = aAnaMod.generate()
+    
+    # Visualise the 3D vector field
+    from solarbextrapolation.visualisation_functions import visualise
+    fig = visualise(aMap3D,
+                    show_boundary_axes=False,
+                    boundary_units=[1.0*u.arcsec, 1.0*u.arcsec],
+                    show_volume_axes=True,
+                    debug=False)
+    mlab.show()
     
     """
     # For B_I field only, to save re-creating this interpolator for every cell.
