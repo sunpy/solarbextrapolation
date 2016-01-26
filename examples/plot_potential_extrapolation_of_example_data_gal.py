@@ -75,7 +75,7 @@ aMap3D  = aPotExt.extrapolate(enable_numba=True)
 
 # The Extrapolations run time is stored in the meta
 floSeconds = np.round(aMap3D.meta['extrapolator_duration'],3)
-print '\nextrapolation duration: ' + str(floSeconds) + ' s\n'
+print('\nextrapolation duration: ' + str(floSeconds) + ' s\n')
 
 ##############################################################################
 # Note that you used enable_numba=True to speed up the computation on systems

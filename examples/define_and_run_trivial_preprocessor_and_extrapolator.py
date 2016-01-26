@@ -1,16 +1,17 @@
 # -*- coding: utf-8 -*-
 """
-==============================
+===============================================
 Defining a Custom Preprocessor and Extrapolator
-==============================
+===============================================
 
 Here you will be creating trivial preprocessor and and exztrqapolatoirs
 following the API.
-"""
 
+"""
 
 ###########################################################################
 # Testing a preprocessor
+
 
 # Define a trivial preprocessor
 class PreZeros(Preprocessors):
@@ -23,15 +24,17 @@ class PreZeros(Preprocessors):
 
         # Creating the trivial zeros map of the same shape as the input map
         map_output = sunpy.map.Map((np.zeros(self.map_input.data.shape),
-                                        self.meta))
+                                    self.meta))
 
         # Outputting the map.
         return map_output
 
 # Generate the boundary
-aMap2D = sunpy.map.Map('C://git//solarextrapolation//solarextrapolation//data//example_data_(100x100)__01_hmi.fits')
-aPrePro = PreZeros(aMap2D.submap([0,10], [0,10]))
+aMap2D = sunpy.map.Map(
+    'C://git//solarextrapolation//solarextrapolation//data//example_data_(100x100)__01_hmi.fits')
+aPrePro = PreZeros(aMap2D.submap([0, 10], [0, 10]))
 aPreProData = aPrePro.preprocess()
+
 # aPreProData = aMap2D.submap([0,10], [0,10])
 
 # Some checks:
@@ -43,6 +46,7 @@ aPreProData = aPrePro.preprocess()
 ###########################################################################
 # Testing an extrapolator
 
+
 # Define trivial extrapolator
 class ExtZeros(Extrapolators):
     def __init__(self, map_magnetogram, **kwargs):
@@ -52,10 +56,14 @@ class ExtZeros(Extrapolators):
         # Adding in custom parameters to the meta
         self.meta['extrapolator_routine'] = 'Zeros Extrapolator'
 
-        arr_4d = np.zeros([self.map_boundary_data.data.shape[0], self.map_boundary_data.data.shape[0], self.z, 3])
-        return Map3D(( arr_4d, self.meta ))
+        arr_4d = np.zeros([self.map_boundary_data.data.shape[0],
+                           self.map_boundary_data.data.shape[0], self.z, 3])
+        return Map3D((arr_4d, self.meta))
 
-aExt = ExtZeros(aPreProData, filepath='C://Users/Alex/solarextrapolation/solarextrapolation/3Dmap.m3d')
+
+aExt = ExtZeros(
+    aPreProData,
+    filepath='C://Users/Alex/solarextrapolation/solarextrapolation/3Dmap.m3d')
 aMap3D = aExt.extrapolate()
 
 # Some checks:

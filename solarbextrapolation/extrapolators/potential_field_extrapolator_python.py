@@ -8,7 +8,7 @@ Created on Thu Aug 20 12:59:44 2015
 import numpy as np
 
 
-def Gn_5_2_29(x, y, z, xP, yP, DxDy_val, z_submerge):  
+def Gn_5_2_29(x, y, z, xP, yP, DxDy_val, z_submerge):
     """
     Discrete Greens Function
     Extends _Gn_5_2_26 by taking the starting position of each magnetic
@@ -19,7 +19,7 @@ def Gn_5_2_29(x, y, z, xP, yP, DxDy_val, z_submerge):
     d_j = y - yP
     d_k = z - z_submerge
     floModDr = np.sqrt(d_i * d_i + d_j * d_j + d_k * d_k)
-    
+
     floOut = 1.0 / (2.0 * np.pi * floModDr)
     return floOut
 
@@ -30,16 +30,20 @@ def phi_extrapolation_python(boundary, shape, Dx, Dy, Dz):
     data.
     This implementation runs in python and so is very slow for larger datasets.
     """
-    
+
     # Derived parameters
     DxDy = Dx * Dy
-    
+
     # From Sakurai 1982 P306, we submerge the monopole
     z_submerge = Dz / np.sqrt(2.0 * np.pi)
-    
+
     # Create the empty numpy volume array.
     D = np.empty((shape[0], shape[1], shape[2]), dtype=np.float)
-    
+
+    i_prime, j_prime = np.indices((shape[0], shape[1]))
+    xP = i_prime * Dx
+    yP = j_prime * Dy
+
     # Iterate though the 3D space.
     for i in range(0, shape[0]):
         for j in range(0, shape[1]):
@@ -48,23 +52,12 @@ def phi_extrapolation_python(boundary, shape, Dx, Dy, Dz):
                 x = i * Dx
                 y = j * Dy
                 z = k * Dz
-                
+
                 # Variable holding running total for the contributions to point.
                 point_phi_sum = 0.0
-                
-                # Iterate through the boundary data.
-                for i_prime in range(0, shape[0]):
-                    for j_prime in range(0, shape[1]):
-                        # Position of contributing point on 2D boundary
-                        xP = i_prime * Dx
-                        yP = j_prime * Dy
-                        
-                        # Find the components for this contribution product
-                        B_n = boundary[i_prime, j_prime]
-                        G_n = Gn_5_2_29(x, y, z, xP, yP, DxDy, z_submerge)
 
-                        # Add the contributions
-                        point_phi_sum += B_n * G_n * DxDy
+                G_n = Gn_5_2_29(x, y, z, xP, yP, DxDy, z_submerge)
+
                 # Now add this to the 3D grid.
-                D[i, j, k] = point_phi_sum
+                D[i, j, k] = np.sum(boundary * G_n * DxDy)
     return D

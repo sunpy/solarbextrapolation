@@ -100,10 +100,12 @@ class AnalyticalModel(object):
         """
         Calculate the LoS vector field as a SunPy map and return.
         
-        Generally this will require that you have run generate(self, **kwargs)
+        Generally this will require that you have run generate(self, ``**kwargs``)
         first, so in the base class this is checked, but it is not always the
         case as some models may allow this to be determined without calculating
-        the full field. ######### I'm not sure if this is a good default.
+        the full field.
+
+        .. I'm not sure if this is a good default.
         """
         return self.magnetogram
 
@@ -111,7 +113,7 @@ class AnalyticalModel(object):
         """
         Calculate the vector field as a SunPy map and return.
         
-        Generally this will require that you have run generate(self, **kwargs)
+        Generally this will require that you have run ``generate(self, **kwargs)``
         first, so in the base class this is checked, but it is not always the
         case as some models may allow this to be determined without calculating
         the full field. ######### I'm not sure if this is a good default.
