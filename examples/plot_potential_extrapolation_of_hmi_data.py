@@ -16,7 +16,7 @@ import numpy as np
 import sunpy.map as mp
 from sunpy.net import vso
 from astropy import units as u
-from mayavi import mlab
+from mayavi import mlab # Necessary for visulisation
 import os
 
 # Module imports
@@ -54,9 +54,9 @@ data_hmi = client.get(result_hmi, methods=('URL-FILE_Rice', 'URL-FILE')).wait()
 # Query VSO.
 result_aia = client.query(
     vso.attrs.Time((2011, 2, 14, 20, 34, 0), (2011, 2, 14, 21, 0, 0)), # Time range.
-    vso.attrs.Instrument('AIA'), # Helioseismic and Magnetic Imager.
+    vso.attrs.Instrument('AIA'),    # Helioseismic and Magnetic Imager.
     vso.attrs.Physobs('intensity'), # Physical observables
-    vso.attrs.Sample(4000 * u.s) # Only take a shot every $var seconds.
+    vso.attrs.Sample(4000 * u.s)    # Only take a shot every $var seconds.
     # More observables at http://sdac.virtualsolar.org/cgi/show_details?keyword=PHYSOBS
 )
 

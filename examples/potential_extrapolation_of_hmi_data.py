@@ -17,7 +17,8 @@ import os
 
 # Module imports
 from solarbextrapolation.map3dclasses import Map3D
-from solarbextrapolation.potential_field_extrapolator import PotentialExtrapolator
+#from solarbextrapolation.potential_field_extrapolator import PotentialExtrapolator
+from solarbextrapolation.extrapolators import PotentialExtrapolator
 from solarbextrapolation.visualisation_functions import visualise
 
 
@@ -30,9 +31,9 @@ client = vso.VSOClient()
 result_hmi = client.query(
     # The following are filters for what data I want.
     vso.attrs.Time((2011, 2, 14, 20, 34, 0), (2011, 2, 14, 21, 0, 0)), # Time range.
-    vso.attrs.Instrument('HMI'), # Helioseismic and Magnetic Imager.
+    vso.attrs.Instrument('HMI'),             # Helioseismic and Magnetic Imager.
     vso.attrs.Physobs('LOS_magnetic_field'), # Physical observables
-    vso.attrs.Sample(4000 * u.s) # Only take a shot every $var seconds.
+    vso.attrs.Sample(4000 * u.s)             # Only take a shot every $var seconds.
     # More observables at http://sdac.virtualsolar.org/cgi/show_details?keyword=PHYSOBS
 )
 
@@ -40,9 +41,9 @@ result_hmi = client.query(
 result_aia = client.query(
     # The following are filters for what data I want.
     vso.attrs.Time((2011, 2, 14, 20, 34, 0), (2011, 2, 14, 21, 0, 0)), # Time range.
-    vso.attrs.Instrument('AIA'), # Helioseismic and Magnetic Imager.
+    vso.attrs.Instrument('AIA'),    # Helioseismic and Magnetic Imager.
     vso.attrs.Physobs('intensity'), # Physical observables
-    vso.attrs.Sample(4000 * u.s) # Only take a shot every $var seconds.
+    vso.attrs.Sample(4000 * u.s)    # Only take a shot every $var seconds.
     # More observables at http://sdac.virtualsolar.org/cgi/show_details?keyword=PHYSOBS
 )
 
@@ -68,14 +69,16 @@ map_hmi_cropped_resampled = map_hmi_cropped.resample(dimensions, method='linear'
 
 # Open the map and create a cropped version for the visualisation.
 map_boundary = mp.Map(data_hmi[0])
+#map_boundary = mp.Map(data_aia[0])
 
 map_boundary_cropped = map_boundary.submap(xrangeextended, yrangeextended)
 
 # Only extrapolate if we don't have a saved version
-if not os.path.isfile(str_vol_filepath):
+
+#if not os.path.isfile(str_vol_filepath):
     aPotExt = PotentialExtrapolator(map_hmi_cropped_resampled, filepath=str_vol_filepath, zshape=20, zrange=zrange)
     aMap3D = aPotExt.extrapolate()
-aMap3D = Map3D.load(str_vol_filepath)
+aPotExt = PotentialExtrapolator(map_hmi_cropped_resampled, filepath=str_vol_filepath, zshape=20, zrange=zrange)
 print '\nextrapolation duration: ' + str(np.round(aMap3D.meta['extrapolator_duration'],3)) + ' s\n'
 
 # Visualise this
