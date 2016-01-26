@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-==============================
+===============================================
 Defining a Custom Preprocessor and Extrapolator
-==============================
+===============================================
 
 Here you will be creating trivial preprocessor and and exztrqapolatoirs
 following the API.
+
 """
 
 # Internal imports

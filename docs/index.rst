@@ -1,5 +1,5 @@
-Documentation
-=============
+Solar Magnetic Field Extrapolation
+==================================
 
 This is an affiliated package for the AstroPy package. The documentation for
 this package is here:

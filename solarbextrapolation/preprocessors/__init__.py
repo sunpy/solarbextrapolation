@@ -1,9 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Wed Sep 30 17:57:17 2015
 
-@author: alex_
-"""
-
-__all__ = ['base']
 from base import Preprocessors
+
+__all__ = ['Preprocessors']
