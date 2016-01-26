@@ -24,6 +24,7 @@ from solarbextrapolation.visualisation_functions import visualise
 # General imports
 import astropy.units as u
 from mayavi import mlab
+import numpy as np
 
 ##############################################################################
 # You are going to try and define a 3D cuboid grid of 20x22x20 with ranges in
@@ -71,7 +72,10 @@ map_boundary.peek()
 # Use potential extrapolator to generate field
 aPotExt = PotentialExtrapolator(map_boundary, zshape=arr_grid_shape[2], zrange=zrange)
 aMap3D  = aPotExt.extrapolate(enable_numba=True)
-#print '\nextrapolation duration: ' + str(np.round(aMap3D.meta['extrapolator_duration'],3)) + ' s\n'
+
+# The Extrapolations run time is stored in the meta
+floSeconds = np.round(aMap3D.meta['extrapolator_duration'],3)
+print '\nextrapolation duration: ' + str(floSeconds) + ' s\n'
 
 ##############################################################################
 # Note that you used enable_numba=True to speed up the computation on systems
