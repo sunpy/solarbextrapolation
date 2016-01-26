@@ -1,9 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Mon Jul 27 15:32:51 2015
-
-@author: alex_
-"""
 
 from astropy import units as u
 import numpy as np
@@ -11,6 +6,7 @@ import sunpy.map as mp
 from copy import deepcopy
 
 __all__ = ["decompose_ang_len", "si_this_map_OLD", "si_this_map"]
+
 
 def decompose_ang_len(qua_input, **kwargs):
     """
