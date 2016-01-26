@@ -52,8 +52,10 @@ setup_cfg = dict(conf.items('metadata'))
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 
 if on_rtd:
-    os.environ['SUNPY_CONFIGDIR'] = '/home/docs/checkouts/readthedocs.org/user_builds/solarbextrapolation/'
-    os.environ['HOME'] = '/home/docs/checkouts/readthedocs.org/user_builds/solarbextrapolation/'
+    os.environ[
+        'SUNPY_CONFIGDIR'] = '/home/docs/checkouts/readthedocs.org/user_builds/solarbextrapolation/'
+    os.environ[
+        'HOME'] = '/home/docs/checkouts/readthedocs.org/user_builds/solarbextrapolation/'
 
 # -- General configuration ----------------------------------------------------
 
@@ -78,8 +80,8 @@ rst_epilog += """
 # This does not *have* to match the package name, but typically does
 project = setup_cfg['package_name']
 author = setup_cfg['author']
-copyright = '{0}, {1}'.format(
-    datetime.datetime.now().year, setup_cfg['author'])
+copyright = '{0}, {1}'.format(datetime.datetime.now().year,
+                              setup_cfg['author'])
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -95,9 +97,8 @@ release = package.__version__
 
 # -- Sphinx Gallery ------------------------------------------------------------
 
-extensions += ['sphinxgallery.gen_gallery']
+extensions += ['sphinx_gallery.gen_gallery']
 
-import sphinxgallery
 #html_static_path = ['_static', sphinxgallery.path_static()]
 try:
     from mayavi import mlab
@@ -106,7 +107,11 @@ try:
 except ImportError:
     find_mlab_figures = False
 
-sphinx_gallery_conf = {'find_mayavi_figures': find_mlab_figures}
+sphinx_gallery_conf = {'find_mayavi_figures': find_mlab_figures,
+                       'gallery_dirs': 'auto_examples',
+                       'examples_dirs': '../examples'}
+
+extensions += ['sphinx.ext.mathjax']
 
 # -- Options for HTML output ---------------------------------------------------
 
@@ -129,7 +134,7 @@ try:
     html_theme = 'sphinx_rtd_theme'
     html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 except ImportError:
-        html_theme = 'default'
+    html_theme = 'default'
 # Custom sidebar templates, maps document names to template names.
 #html_sidebars = {}
 
@@ -149,7 +154,6 @@ html_title = '{0} v{1}'.format(project, release)
 # Output file base name for HTML help builder.
 htmlhelp_basename = project + 'doc'
 
-
 # -- Options for LaTeX output --------------------------------------------------
 
 # Grouping the document tree into LaTeX files. List of tuples
@@ -157,19 +161,17 @@ htmlhelp_basename = project + 'doc'
 latex_documents = [('index', project + '.tex', project + u' Documentation',
                     author, 'manual')]
 
-
 # -- Options for manual page output --------------------------------------------
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [('index', project.lower(), project + u' Documentation',
-              [author], 1)]
-
+man_pages = [('index', project.lower(), project + u' Documentation', [author],
+              1)]
 
 ## -- Options for the edit_on_github extension ----------------------------------------
 
 if eval(setup_cfg.get('edit_on_github')):
-    extensions += ['astropy_helpers.sphinx.ext.edit_on_github', 'sphinx.ext.mathjax']
+    extensions += ['astropy_helpers.sphinx.ext.edit_on_github']
 
     versionmod = __import__(setup_cfg['package_name'] + '.version')
     edit_on_github_project = setup_cfg['github_project']

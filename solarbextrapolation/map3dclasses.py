@@ -1,9 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Mon Sep 28 19:55:44 2015
-
-@author: alex_
-"""
 
 # General Imports
 import matplotlib as mpl
@@ -49,6 +44,7 @@ class Map3D(object):
         * cdelt1/2/3: the size of each pixel in each axis.
         * unit1/2/3: the spacial units in each axis.
         * naxis1/2/3: the number of pixels in each axis.
+   
     """
     def __init__(self, data, meta, **kwargs):
         self.data = data
@@ -231,18 +227,15 @@ class Map3DComparer(object):
     """
     | Class for comparrison of vector fields.
     | There are two classification of test:
-    | * **Mono**: returns a value for a given vector field. Can be normalized to
-    the benchmark field.
+    | * **Mono**: returns a value for a given vector field. Can be normalized to the benchmark field.
     | * **Binary**: requires comparrison between two vector fields.
     | By default:
-    | * Benchmark field is the first/original vector field. This is
-    used as the baseline for comparrison. This can be changed using the
-    benchmark=n kwarg.
+    | * Benchmark field is the first/original vector field. This is used as the baseline for comparrison. This can be changed using the ``benchmark=n`` kwarg.
     | * Normalise will be set to false.
-    | Individual tests can be run and return results for imediate viewing
-    (using astropy.table).
+    | Individual tests can be run and return results for imediate viewing (using astropy.table).
     | Likewise, compare_all can be used to run the whole series of tests.
     | Note: all vector fields must be of the same shape.
+
     """
     def __init__(self, map3D, *args, **kwargs):
         # Use all the user parameters
@@ -295,10 +288,14 @@ class Map3DComparer(object):
         """
         l-infinity norm of the vector field.
         For vector field :math:`\bfx` this would be:
-        \left \| \mathbf{x} \right \|_\infty = \sqrt[\infty]{\Sigma_i x_i^\infty} \approx \textup{max}(|x_i|)
+
+        .. math::
+
+           \| \mathbf{x} \| \infty = \sqrt[\infty]{\Sigma_i x_i^\infty} \approx \text{max}(|x_i|)
+
         (the malue of the maximum component)
 
-        # From: https://rorasa.wordpress.com/2012/05/13/l0-norm-l1-norm-l2-norm-l-infinity-norm/
+        From: https://rorasa.wordpress.com/2012/05/13/l0-norm-l1-norm-l2-norm-l-infinity-norm/
         """
 
         # Placeholder for the maximum value.
