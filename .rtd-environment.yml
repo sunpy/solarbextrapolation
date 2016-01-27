@@ -1,4 +1,7 @@
 name: solarb
+channels:
+    - astropy
+    - sunpy
 dependencies:
 - alabaster=0.7.6=py27_0
 - apptools=4.2.1=py27_0
