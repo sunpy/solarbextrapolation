@@ -2,6 +2,7 @@ name: solarb
 channels:
     - astropy
     - sunpy
+    - cadair
 dependencies:
 - alabaster=0.7.6=py27_0
 - apptools=4.2.1=py27_0
@@ -70,7 +71,7 @@ dependencies:
 - tk=8.5.18=0
 - traits=4.5.0=py27_0
 - traitsui=4.4.0=py27_0
-- vtk=5.10.1=py27_1
+- vtk=6.3.0=py27_1
 - wcsaxes=0.6=py27_0
 - wheel=0.26.0=py27_1
 - xz=5.0.5=0
