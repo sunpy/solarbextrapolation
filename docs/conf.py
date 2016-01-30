@@ -52,10 +52,25 @@ setup_cfg = dict(conf.items('metadata'))
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 
 if on_rtd:
-    os.environ[
-        'SUNPY_CONFIGDIR'] = '/home/docs/checkouts/readthedocs.org/user_builds/solarbextrapolation/'
-    os.environ[
-        'HOME'] = '/home/docs/checkouts/readthedocs.org/user_builds/solarbextrapolation/'
+    os.environ['SUNPY_CONFIGDIR'] = '/home/docs/checkouts/readthedocs.org/user_builds/solarbextrapolation/'
+    os.environ['HOME'] = '/home/docs/checkouts/readthedocs.org/user_builds/solarbextrapolation/'
+else:
+    # -- Sphinx Gallery ------------------------------------------------------------
+
+    extensions += ['sphinx_gallery.gen_gallery']
+
+    #html_static_path = ['_static', sphinxgallery.path_static()]
+    try:
+        from mayavi import mlab
+        find_mlab_figures = True
+        mlab.options.offscreen = True
+    except ImportError:
+        find_mlab_figures = False
+
+    sphinx_gallery_conf = {'find_mayavi_figures': find_mlab_figures,
+                        'gallery_dirs': 'auto_examples',
+                        'examples_dirs': '../examples'}
+
 
 # -- General configuration ----------------------------------------------------
 
@@ -95,21 +110,6 @@ version = package.__version__.split('-', 1)[0]
 # The full version, including alpha/beta/rc tags.
 release = package.__version__
 
-# -- Sphinx Gallery ------------------------------------------------------------
-
-extensions += ['sphinx_gallery.gen_gallery']
-
-#html_static_path = ['_static', sphinxgallery.path_static()]
-try:
-    from mayavi import mlab
-    find_mlab_figures = True
-    mlab.options.offscreen = True
-except ImportError:
-    find_mlab_figures = False
-
-sphinx_gallery_conf = {'find_mayavi_figures': find_mlab_figures,
-                       'gallery_dirs': 'auto_examples',
-                       'examples_dirs': '../examples'}
 
 extensions += ['sphinx.ext.mathjax']
 
