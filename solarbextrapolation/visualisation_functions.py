@@ -88,6 +88,7 @@ def visualise(aMap3D, **kwargs):
 
     # Slice (scale) the fields to make the vectors usable in mayavi.
     int_slice_scale = 1
+    print "shape: " + str(aMap3D.data.shape)
     npm_3d_sliced   = aMap3D.data[::int_slice_scale,::int_slice_scale,::int_slice_scale,:]
 
     # Plot the main vector field (volume).

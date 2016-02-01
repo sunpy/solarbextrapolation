@@ -92,9 +92,9 @@ class Extrapolators(object):
         #print 'help(u): ' + str(help(u))
         #print '\n\n'
         self.zrange = kwargs.get('zrange', u.Quantity([0.0, 1.0] * u.Mm) )
-        self.shape = (self.map_boundary_data.data.shape[0],
+        self.shape = np.asarray([self.map_boundary_data.data.shape[0],
                       self.map_boundary_data.data.shape[1],
-                      long(kwargs.get('zshape', 1L)))
+                      long(kwargs.get('zshape', 1L))])
         self.filepath = kwargs.get('filepath', None)
         self.routine = kwargs.get('extrapolator_routine', type(self))
 
@@ -174,7 +174,7 @@ class Extrapolators(object):
         arr_output.meta['extrapolator_start_time'] = dt_start.isoformat()
         arr_output.meta['extrapolator_duration'] = tim_duration
         arr_output.meta['extrapolator_duration_unit'] = u.s
-        
+
         # Save the Map3D if a filepath has been set. (to avoid loosing work)
         if self.filepath:
             arr_output.save(self.filepath)
