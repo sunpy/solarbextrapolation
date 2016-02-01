@@ -114,9 +114,6 @@ def visualise(aMap3D, **kwargs):
     # Place a small outline around the data cube
     mlab.outline()
 
-    return vec_field, vec_field_mag
-
-
     if show_volume_axes:
         # Label axes
         axes = mlab.axes()
