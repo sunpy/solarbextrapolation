@@ -55,7 +55,7 @@ quantities.
 .. code-block:: python
 
 
-    # The input parameters:
+    # Input parameters:
     arr_grid_shape = [ 20, 22, 20 ]         # [ y-size, x-size ]
     xrange = u.Quantity([ -10.0, 10.0 ] * u.arcsec)
     yrange = u.Quantity([ -11.0, 11.0 ] * u.arcsec)
@@ -118,7 +118,7 @@ You can check the resulting generated data by using peek().
 
 
 
-.. image:: /auto_examples/images/sphx_glr_plot_potential_extrapolation_of_example_data_001.png
+.. image:: /auto_examples\images\sphx_glr_plot_potential_extrapolation_of_example_data_001.png
     :align: center
 
 
@@ -148,9 +148,9 @@ extrapolate on this to return a Map3D object with the resulting vector field.
 
  Out::
 
-      False
+      True
 
-    extrapolation duration: 0.324 s
+    extrapolation duration: 1.657 s
 
 
 Note that you used enable_numba=True to speed up the computation on systems
@@ -175,17 +175,22 @@ solarbextrapolation.example_data_generator.visualise tools:
 
 
 
-.. image:: /auto_examples/images/sphx_glr_plot_potential_extrapolation_of_example_data_000.png
+.. image:: /auto_examples\images\sphx_glr_plot_potential_extrapolation_of_example_data_000.png
     :align: center
 
 
+.. rst-class:: sphx-glr-script-out
+
+ Out::
+
+      shape: (20L, 22L, 20L, 3L)
 
 
 Note that the parameters here are simply to decide what boundary ranges
 to display.
 
 **Total running time of the script:**
-(0 minutes 4.548 seconds)
+(0 minutes 6.418 seconds)
 
 
 

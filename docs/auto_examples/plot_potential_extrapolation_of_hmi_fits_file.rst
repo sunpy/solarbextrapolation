@@ -15,10 +15,14 @@ extrapolator and visualising.
 .. code-block:: pytb
 
     Traceback (most recent call last):
-      File "/opt/miniconda/envs/solarb/lib/python2.7/site-packages/sphinx_gallery/gen_rst.py", line 467, in execute_script
+      File "C:\Users\alex_\Anaconda\lib\site-packages\sphinx_gallery\gen_rst.py", line 467, in execute_script
         exec(code_block, example_globals)
-      File "<string>", line 9, in <module>
-    ImportError: No module named classes
+      File "<string>", line 25, in <module>
+      File "C:\Users\alex_\Anaconda\lib\site-packages\sunpy-0.6-py2.7.egg\sunpy\map\map_factory.py", line 239, in __call__
+        data_header_pairs, already_maps = self._parse_args(*args, **kwargs)
+      File "C:\Users\alex_\Anaconda\lib\site-packages\sunpy-0.6-py2.7.egg\sunpy\map\map_factory.py", line 202, in _parse_args
+        raise ValueError("File not found or invalid input")
+    ValueError: File not found or invalid input
 
 
 
@@ -34,8 +38,8 @@ extrapolator and visualising.
     import os
 
     # Module imports
-    from solarbextrapolation.classes import Map3D
-    from solarbextrapolation.potential_field_extrapolator import PotentialExtrapolator
+    from solarbextrapolation.map3dclasses import Map3D
+    from solarbextrapolation.extrapolators import PotentialExtrapolator
     from solarbextrapolation.visualisation_functions import visualise
 
     # Cropping into the active region within the HMI map

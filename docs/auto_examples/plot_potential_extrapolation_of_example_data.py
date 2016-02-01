@@ -32,7 +32,7 @@ import numpy as np
 # arcseconds, these parameters can be stored in the following lists and astropy
 # quantities.
 
-# The input parameters:
+# Input parameters:
 arr_grid_shape = [ 20, 22, 20 ]         # [ y-size, x-size ]
 xrange = u.Quantity([ -10.0, 10.0 ] * u.arcsec)
 yrange = u.Quantity([ -11.0, 11.0 ] * u.arcsec)
