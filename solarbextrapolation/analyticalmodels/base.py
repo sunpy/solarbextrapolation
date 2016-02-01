@@ -47,11 +47,13 @@ class AnalyticalModel(object):
         self.meta['analytical_model_notes'] = kwargs.get('notes', '')
         self.meta['BUNIT'] = kwargs.get('bunit', u.T)
         # CRVALn, CDELTn and NAXIS (alreadu in meta) used for storing range in 2D fits files.
+        self.filepath = kwargs.get('filepath', None)
         self.routine = kwargs.get('analytical_model_routine', type(self))
         
         # Default 3D magnetic field
-        X, Y, Z = np.zeros(self.shape.value), np.zeros(self.shape.value), np.zeros(self.shape.value)
-        self.field = Map3D(X, Y, Z, self.meta)
+        #X,Y,Z = np.zeros(self.shape.value), np.zeros(self.shape.value), np.zeros(self.shape.value)
+        npField = np.zeros([3]+self.shape.value)
+        self.field = Map3D(npField, self.meta)
         
         # Default magnetic field on boundary
         magnetogram = np.zeros(self.shape[0:2].value)
@@ -140,19 +142,18 @@ if __name__ == '__main__':
     
     
     
-    print("hello")
     
     # Define the extrapolator as a child of the Extrapolators class
     class AnaZeros(AnalyticalModel):
         def __init__(self, **kwargs):
-            super(AnalyticalModel, self).__init__(**kwargs)
+            super(AnaZeros, self).__init__(**kwargs)
 
         def _generate_field(self, **kwargs):
             # Adding in custom parameters to the metadata
             self.meta['analytical_model_routine'] = 'Zeros Model'
             
             # Generate a trivial field and return
-            arr_4d = np.zeros(self.shape)
+            arr_4d = np.zeros([3]+self.shape.value)
             return Map3D( arr_4d, self.meta )
     
     
@@ -164,6 +165,7 @@ if __name__ == '__main__':
     aAnaMod = AnaZeros()
     aMap3D = aAnaMod.generate()
     
+
     # Visualise the 3D vector field
     from solarbextrapolation.visualisation_functions import visualise
     fig = visualise(aMap3D,
@@ -172,7 +174,7 @@ if __name__ == '__main__':
                     show_volume_axes=True,
                     debug=False)
     mlab.show()
-    
+
     """
     # For B_I field only, to save re-creating this interpolator for every cell.
     A_I_r_perp_interpolator = interpolate_A_I_from_r_perp(flo_TD_R, flo_TD_a, flo_TD_d, flo_TD_I, (x_size**2 + y_size**2 + z_size**2)**(0.5)*1.2, 1000`0)
