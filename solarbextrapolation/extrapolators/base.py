@@ -105,7 +105,7 @@ class Extrapolators(object):
         Uses the small angle approximation.
         """
         r = self.map_boundary_data.dsun - self.map_boundary_data.rsun_meters
-        length = (r * self.map_boundary_data.xrange.to(u.radian))
+        length = (r * arc.to(u.radian))
         return length.to(u.m, equivalencies=u.dimensionless_angles())
 
     def _to_SI(self, **kwargs):
