@@ -41,7 +41,7 @@ def outer_loop(D, Dx, Dy, Dz, boundary):
                 z = k * Dz
 
                 # Now add this to the 3D grid.
-                D[i, j, k] = inner_loop(shape, Dx, Dy, x, y, z, boundary, z_submerge)
+                D[j, i, k] = inner_loop(shape, Dx, Dy, x, y, z, boundary, z_submerge)
     return D
 
 
@@ -58,7 +58,7 @@ def inner_loop(shape, Dx, Dy, x, y, z, boundary, z_submerge):
             yP = j_prime * Dy
 
             # Find the components for this contribution product
-            B_n = boundary[i_prime, j_prime]
+            B_n = boundary[j_prime, i_prime]
             G_n = Gn_5_2_29(x, y, z, xP, yP, DxDy, z_submerge)
 
             # Add the contributions

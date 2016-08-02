@@ -53,7 +53,7 @@ def phi_extrapolation_python(boundary, shape, Dx, Dy, Dz):
     # Create the empty numpy volume array.
     D = np.empty((shape[1], shape[0], shape[2]), dtype=np.float)
 
-    i_prime, j_prime = np.indices((shape[0], shape[1]))
+    i_prime, j_prime = np.indices((shape[1], shape[0]))
     xP = i_prime * Dx
     yP = j_prime * Dy
 
