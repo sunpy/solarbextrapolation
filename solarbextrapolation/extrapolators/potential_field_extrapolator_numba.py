@@ -19,7 +19,7 @@ def phi_extrapolation_numba(boundary, shape, Dx, Dy, Dz):
     """
 
     # Create the empty numpy volume array.
-    D = np.empty((shape[0], shape[1], shape[2]), dtype=np.float)
+    D = np.empty((shape[1], shape[0], shape[2]), dtype=np.float)
 
     D = outer_loop(D, Dx, Dy, Dz, boundary)
 
@@ -32,8 +32,8 @@ def outer_loop(D, Dx, Dy, Dz, boundary):
     # From Sakurai 1982 P306, we submerge the monopole
     z_submerge = Dz / np.sqrt(2.0 * np.pi)
     # Iterate though the 3D space.
-    for i in range(0, shape[0]):
-        for j in range(0, shape[1]):
+    for i in range(0, shape[1]):
+        for j in range(0, shape[0]):
             for k in range(0, shape[2]):
                 # Position of point in 3D space
                 x = i * Dx
@@ -51,8 +51,8 @@ def inner_loop(shape, Dx, Dy, x, y, z, boundary, z_submerge):
     # Variable holding running total for the contributions to point.
     point_phi_sum = 0.0
     # Iterate through the boundary data.
-    for i_prime in range(0, shape[0]):
-        for j_prime in range(0, shape[1]):
+    for i_prime in range(0, shape[1]):
+        for j_prime in range(0, shape[0]):
             # Position of contributing point on 2D boundary
             xP = i_prime * Dx
             yP = j_prime * Dy
@@ -84,5 +84,3 @@ def Gn_5_2_29(x, y, z, xP, yP, DxDy_val, z_submerge):
 
     floOut = 1.0 / (2.0 * np.pi * floModDr)
     return floOut
-
-
