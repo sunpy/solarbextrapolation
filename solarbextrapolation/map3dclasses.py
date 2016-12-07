@@ -44,13 +44,13 @@ class Map3D(object):
         * cdelt1/2/3: the size of each pixel in each axis.
         * unit1/2/3: the spacial units in each axis.
         * naxis1/2/3: the number of pixels in each axis.
-   
+
     """
     def __init__(self, data, meta, **kwargs):
         self.data = data
         self.meta = meta
-        self.xrange = kwargs.get('xrange', [ 0, data.shape[0] ] * u.pixel)
-        self.yrange = kwargs.get('yrange', [ 0, data.shape[1] ] * u.pixel)
+        self.xrange = kwargs.get('xrange', [ 0, data.shape[1] ] * u.pixel)
+        self.yrange = kwargs.get('yrange', [ 0, data.shape[0] ] * u.pixel)
         self.zrange = kwargs.get('zrange', [ 0, data.shape[2] ] * u.pixel)
         self.xobsrange = kwargs.get('xobsrange', self.xrange)
         self.yobsrange = kwargs.get('yobsrange', self.yrange)
@@ -59,15 +59,15 @@ class Map3D(object):
         self.meta['xrange'] = self.xrange
         self.meta['yrange'] = self.yrange
         self.meta['zrange'] = self.zrange
-        self.meta['cdelt1'] = ((self.xrange[1] - self.xrange[0]) / self.data.shape[0]).value
-        self.meta['cdelt2'] = ((self.yrange[1] - self.yrange[0]) / self.data.shape[1]).value
+        self.meta['cdelt1'] = ((self.xrange[1] - self.xrange[0]) / self.data.shape[1]).value
+        self.meta['cdelt2'] = ((self.yrange[1] - self.yrange[0]) / self.data.shape[0]).value
         self.meta['cdelt3'] = ((self.zrange[1] - self.zrange[0]) / self.data.shape[2]).value
         # Note: should be reversed to fortran array indexing
         self.meta['cunit1'] = self.xrange.unit
         self.meta['cunit2'] = self.yrange.unit
         self.meta['cunit3'] = self.zrange.unit
-        self.meta['naxis1'] = self.data.shape[0]
-        self.meta['naxis2'] = self.data.shape[1]
+        self.meta['naxis1'] = self.data.shape[1]
+        self.meta['naxis2'] = self.data.shape[0]
         self.meta['naxis3'] = self.data.shape[2]
         if kwargs.get('date_obs', False):
             self.meta['date-obs'] = kwargs.get('date_obs')

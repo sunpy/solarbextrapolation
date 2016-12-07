@@ -92,8 +92,8 @@ class Extrapolators(object):
         #print 'help(u): ' + str(help(u))
         #print '\n\n'
         self.zrange = kwargs.get('zrange', u.Quantity([0.0, 1.0] * u.Mm) )
-        self.shape = np.asarray([self.map_boundary_data.data.shape[0],
-                      self.map_boundary_data.data.shape[1],
+        self.shape = np.asarray([self.map_boundary_data.data.shape[1],
+                      self.map_boundary_data.data.shape[0],
                       long(kwargs.get('zshape', 1L))])
         self.filepath = kwargs.get('filepath', None)
         self.routine = kwargs.get('extrapolator_routine', type(self))
@@ -105,7 +105,7 @@ class Extrapolators(object):
         Uses the small angle approximation.
         """
         r = self.map_boundary_data.dsun - self.map_boundary_data.rsun_meters
-        length = (r * self.map_boundary_data.xrange.to(u.radian))
+        length = (r * arc.to(u.radian))
         return length.to(u.m, equivalencies=u.dimensionless_angles())
 
     def _to_SI(self, **kwargs):

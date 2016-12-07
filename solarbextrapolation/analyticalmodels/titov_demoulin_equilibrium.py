@@ -32,7 +32,7 @@ from scipy import interpolate
 from astropy import units as u
 
 
-# Imports for numba JIT compilation 
+# Imports for numba JIT compilation
 from numba import double
 from numba.decorators import jit, autojit
 
@@ -56,7 +56,7 @@ qua_TD_q = 100.0 * 10**12 * u.m * u.m * u.T  # T m^2  # ABS Charge of +q and -q.
 qua_TD_a = 31.0*10**6 * u.m  # m      # Radius of uniform current I.
 
 qua_TD_I_0 = -7.0*10**12 * u.A # A # - 7.0 TA #
-flo_TD_li = 1.0 / 2.0 # for uniform distribution of current over toroidal flux tube. 
+flo_TD_li = 1.0 / 2.0 # for uniform distribution of current over toroidal flux tube.
 
 # Convert all these into SI units
 flo_TD_L   = qua_TD_L.to(u.m).value
@@ -76,7 +76,7 @@ TD_q = 100.0*10**12   # T m^2  # ABS Charge of +q and -q.
 TD_a = 31.0*10**6  # m      # Radius of uniform current I.
 
 TD_I_0 = -7.0*10**12 # A # - 7.0 TA #
-TD_li = 1.0/2.0 # for uniform distribution of current over toroidal flux tube. 
+TD_li = 1.0/2.0 # for uniform distribution of current over toroidal flux tube.
 TD_I = 8.0 * pi * TD_q * TD_L * TD_R * (TD_R**2.0 + TD_L**2)**(-3.0/2.0) / ( mu_0 * (np.log(8.0 * TD_R / TD_a) - (3.0/2.0) + (TD_li / 2.0)) ) # 11 # 11000 GA # Equilibrium
 
 
@@ -121,7 +121,7 @@ def chi_safe(X, val, debug = 0):
 
     # Debugging
     if debug > 0:
-        print 'chi_safe(' + str(X) + '): ' + str(out)
+        print('chi_safe(' + str(X) + '): ' + str(out))
     # Output
     return out
 
@@ -132,18 +132,18 @@ def r_perpendicular_scalar(y, z, d, debug = 0):
 
     # Debugging
     if debug > 0:
-        print 'r_perpendicular_scalar: ' + str(out)
+        print('r_perpendicular_scalar: ' + str(out))
     # Output
     return out
 
-# 
+#
 def rho(x, y, z, R, d, debug = 0):
     # Output
     out = ( x**2.0 + (r_perpendicular_scalar(y, z, d, debug - 2) - R)**2.0 )**(0.5)
 
     # Debugging
     if debug > 0:
-        print 'rho: ' + str(out)
+        print('rho: ' + str(out))
     # Output
     return out
 
@@ -151,7 +151,7 @@ def rho(x, y, z, R, d, debug = 0):
 def theta_hat(y, z, d, debug = 0):
     # r_perp
     r_perp = r_perpendicular_scalar(y, z, d, debug - 2)
-    
+
     # Components
     theta_hat_x = 0.0
     theta_hat_y = - ( ( z + d ) / r_perp )
@@ -162,7 +162,7 @@ def theta_hat(y, z, d, debug = 0):
 
     # Debugging
     if debug > 0:
-        print 'theta_hat: ' + str(out)
+        print('theta_hat: ' + str(out))
     # Output
     return out
 
@@ -171,7 +171,7 @@ def theta_hat(y, z, d, debug = 0):
 def B_theta(x, y, z, a, d, R, I, I_0, debug = 0):
     # Find rho
     rho_val = rho(x, y, z, R, d, debug - 2)
-    
+
     # The parts.
     part_1  = ( mu_0 * I_0 ) / (2.0 * pi )
     part_2a = R**(-2.0)
@@ -185,24 +185,24 @@ def B_theta(x, y, z, a, d, R, I, I_0, debug = 0):
     # Now put it together.
     scalar = part_1 * (part_2 + part_3 - part_4)
     vector = theta_hat(y, z, d)
-    
+
     # Output
     out = np.array([scalar * vector[0], scalar * vector[1], scalar * vector[2]])
 
     # Debugging
     if debug > 0:
-        print 'B_theta: ' + str(out)
+        print('B_theta: ' + str(out))
     if debug > 1:
-        print '  B_theta  part_1: ' + str(part_1)
-        print '  B_theta  part_2: ' + str(part_2)
-        print '  B_theta    part_2a: ' + str(part_2a)
-        print '  B_theta    part_2b: ' + str(part_2b)
-        print '  B_theta    part_2c: ' + str(part_2c)
-        print '  B_theta    part_2d: ' + str(part_2d)
-        print '  B_theta  part_3: ' + str(part_3)
-        print '  B_theta  part_4: ' + str(part_4)
-        print '  B_theta  scalar: ' + str(scalar)
-        print '  B_theta  vector: ' + str(vector) + '\n'
+        print ('  B_theta  part_1: ' + str(part_1))
+        print ('  B_theta  part_2: ' + str(part_2))
+        print ('  B_theta    part_2a: ' + str(part_2a))
+        print ('  B_theta    part_2b: ' + str(part_2b))
+        print ('  B_theta    part_2c: ' + str(part_2c))
+        print ('  B_theta    part_2d: ' + str(part_2d))
+        print ('  B_theta  part_3: ' + str(part_3))
+        print ('  B_theta  part_4: ' + str(part_4))
+        print ('  B_theta  scalar: ' + str(scalar))
+        print ('  B_theta  vector: ' + str(vector) + '\n')
     # Output
     return out
 
@@ -222,40 +222,40 @@ def r_plusminus(x, y, z, L, d, sign, debug = 0):
 
     # Output B_q vector.
     out = np.array([ r_x, r_y, r_z ])
-    
+
     # Debugging
     if debug > 0:
-        print 'r_plusminus(..., ' + str(sign) + '): ' + str(out)
+        print('r_plusminus(..., ' + str(sign) + '): ' + str(out))
     # Output
     return out
 
 # Returns the B-q vector (numpy array) at given x, y, z.
 def B_q(x, y, z, L, d, q, debug = 0):
-    # Getting the r+- vectors    
+    # Getting the r+- vectors
     r_plus = r_plusminus(x, y, z, L, d, 1.0, debug - 2)
     r_minus = r_plusminus(x, y, z, L, d, -1.0, debug - 2)
-    
+
     # Get the modulus of these
     mod_r_plus = (r_plus[0]**2.0 + r_plus[1]**2.0 + r_plus[2]**2.0)**(0.5)
     mod_r_minus = (r_minus[0]**2.0 + r_minus[1]**2.0 + r_minus[2]**2.0)**(0.5)
-    
+
     # Get the two fractions form (20)
     frac_r_plus = r_plus / (mod_r_plus**3.0)
     frac_r_minus = r_minus / (mod_r_minus**3.0)
-    
+
     # Output B_q vector.
     out = q * np.subtract(frac_r_plus, frac_r_minus)
-    
+
     # Debugging
     if debug > 0:
-        print 'B_q: ' + str(out)
+        print('B_q: ' + str(out))
     if debug > 1:
-        print '  B_q  r_plus: ' + str(r_plus)
-        print '  B_q  r_minus: ' + str(r_minus)
-        print '  B_q  mod_r_plus: ' + str(mod_r_plus)
-        print '  B_q  mod_r_minus: ' + str(mod_r_minus)
-        print '  B_q  frac_r_plus: ' + str(frac_r_plus)
-        print '  B_q  frac_r_minus: ' + str(frac_r_minus) + '\n'
+        print('  B_q  r_plus: ' + str(r_plus))
+        print('  B_q  r_minus: ' + str(r_minus))
+        print('  B_q  mod_r_plus: ' + str(mod_r_plus))
+        print('  B_q  mod_r_minus: ' + str(mod_r_minus))
+        print('  B_q  frac_r_plus: ' + str(frac_r_plus))
+        print('  B_q  frac_r_minus: ' + str(frac_r_minus) + '\n')
     # Output
     return out
 
@@ -280,47 +280,47 @@ def r_perpendicular_vector(y, z, d, debug = 0):
 
     # Debugging
     if debug > 0:
-        print 'r_perpendicular_vector: ' + str(out)
+        print('r_perpendicular_vector: ' + str(out))
     # Output
     return out
 
 
 def k_func(x, y, z, d, R, debug = 0):
-    # Parameters    
+    # Parameters
     r_perp = r_perpendicular_scalar(y, z, d, debug - 2)
-    
+
     # fraction inside root
     frac = (r_perp * R)/((r_perp + R)**2.0 + x**2.0)
-    
+
     # Output
     out = 2 * (frac)**(0.5)
-    
+
     # Debugging
     if debug > 0:
-        print 'k_a_func: ' + str(out)
+        print('k_a_func: ' + str(out))
     if debug > 1:
-        print '  k_func  r_perp: ' + str(r_perp)
-        print '  k_func  frac: ' + str(frac)
+        print('  k_func  r_perp: ' + str(r_perp))
+        print('  k_func  frac: ' + str(frac))
     # Output
     return out
 
 
 def k_a_func(y, z, d, R, a, debug = 0):
-    # Parameters    
+    # Parameters
     r_perp = r_perpendicular_scalar(y, z, d, debug - 2)
-    
+
     # fraction inside root
     frac = (r_perp * R)/(4.0 * r_perp * R + a**2.0)
-    
+
     # Output
     out = 2 * (frac)**(0.5)
-    
+
     # Debugging
     if debug > 0:
-        print 'k_a_func: ' + str(out)
+        print('k_a_func: ' + str(out))
     if debug > 1:
-        print '  k_a_func  r_perp: ' + str(r_perp)
-        print '  k_a_func  frac: ' + str(frac)        
+        print('  k_a_func  r_perp: ' + str(r_perp))
+        print('  k_a_func  frac: ' + str(frac))
     # Output
     return out
 
@@ -328,10 +328,10 @@ def k_a_func(y, z, d, R, a, debug = 0):
 def A_of_k(k, debug = 0):
     # Output
     out = (k**(-1.0))*((2.0 - k**2.0) * scipy.special.ellipk(k))
-    
+
     # Debugging
     if debug > 0:
-        print 'A_of_k(' + str(k) + '): ' + str(out)
+        print('A_of_k(' + str(k) + '): ' + str(out))
     # Output
     return out
 
@@ -340,55 +340,55 @@ def A_prime_of_k(k, debug = 0):
     numerator_1 = (2.0 - k**2.0) * scipy.special.ellipe(k)
     numerator_2 = 2.0 * (1.0 - k**2.0) * scipy.special.ellipk(k)
     denominator = k**2.0 * (1.0 - k**2.0)
-    
+
     # Output
     out = (numerator_1 - numerator_2) / denominator
-    
+
     # Debugging
     if debug > 0:
-        print 'A_prime_of_k: ' + str(out)
+        print ('A_prime_of_k: ' + str(out))
     if debug > 1:
-        print '  A_prime_of_k  numerator_1: ' + str(numerator_1)
-        print '  A_prime_of_k  numerator_2: ' + str(numerator_2)
-        print '  A_prime_of_k  denominator: ' + str(denominator)
+        print('  A_prime_of_k  numerator_1: ' + str(numerator_1))
+        print('  A_prime_of_k  numerator_2: ' + str(numerator_2))
+        print('  A_prime_of_k  denominator: ' + str(denominator))
     # Output
     return out
 
 def A_tilde_I_in(k, k_a, r_perp, R, I, debug = 0):
-    # Building the parts    
+    # Building the parts
     part_1 = (mu_0 * I)/(2.0 * pi)
     part_2 = ((R)/(r_perp))**(0.5)
     part_3 = A_of_k(k_a, debug - 2) + A_prime_of_k(k_a, debug - 2) * (k - k_a)
-    
+
     # Output
     out = part_1 * part_2 * part_3
-    
+
     # Debugging
     if debug > 0:
-        print 'A_tilde_I_in: ' + str(out)
+        print('A_tilde_I_in: ' + str(out))
     if debug > 1:
-        print '  A_tilde_I_in  part_1: ' + str(part_1)
-        print '  A_tilde_I_in  part_2: ' + str(part_2)
-        print '  A_tilde_I_in  part_3: ' + str(part_3)
+        print('  A_tilde_I_in  part_1: ' + str(part_1))
+        print('  A_tilde_I_in  part_2: ' + str(part_2))
+        print('  A_tilde_I_in  part_3: ' + str(part_3))
     # Output
     return out
 
 def A_I_ex(k, r_perp, R, I, debug = 0):
-    # Building the parts    
+    # Building the parts
     part_1 = (mu_0 * I)/(2.0 * pi)
     part_2 = ((R)/(r_perp))**(0.5)
     part_3 = A_of_k(k)
-    
+
     # Output
     out = part_1 * part_2 * part_3
 
     # Debugging
     if debug > 0:
-        print 'A_I_ex: ' + str(out)
+        print('A_I_ex: ' + str(out))
     if debug > 1:
-        print '  A_I_ex  part_1: ' + str(part_1)
-        print '  A_I_ex  part_2: ' + str(part_2)
-        print '  A_I_ex  part_3: ' + str(part_3)
+        print('  A_I_ex  part_1: ' + str(part_1))
+        print('  A_I_ex  part_2: ' + str(part_2))
+        print('  A_I_ex  part_3: ' + str(part_3))
     # Output
     return out
 
@@ -398,7 +398,7 @@ def A_I(x, y, z, R, a, d, I, debug = 0):
     k = k_func(x, y, z, d, R, debug - 2)
     k_a = k_a_func(y, z, d, R, a, debug - 2)
     r_perp = r_perpendicular_scalar(y, z, d, debug - 2)
-    
+
     # Parts
     part_1 = chi_safe(a - rho_val, A_tilde_I_in(k, k_a, r_perp, R, I))
     part_2 = chi_safe(rho_val - a, A_I_ex(k, r_perp, R, I))
@@ -406,10 +406,10 @@ def A_I(x, y, z, R, a, d, I, debug = 0):
 
     # Debugging
     if debug > 0:
-        print 'A_I: ' + str(out)
+        print('A_I: ' + str(out))
     if debug > 1:
-        print '  A_I  part_1: ' + str(part_1)
-        print '  A_I  part_2: ' + str(part_2)
+        print('  A_I  part_1: ' + str(part_1))
+        print('  A_I  part_2: ' + str(part_2))
     # Output
     return out
 
@@ -417,10 +417,10 @@ def A_I(x, y, z, R, a, d, I, debug = 0):
 def interpolate_A_I_from_r_perp(R, a, d, I, r_perp_max, resolution = 100000, debug = 0):
     # parameters to pass in:
     dr_perp = 1.0 * r_perp_max / resolution
-    
+
     # 1D array of vectors for A_I(r_perp)
     npm_A_I = np.zeros((resolution, 2))
-    
+
     # If we lock x = 0, z = -d then we know r_perp = y
     x = 0.0
     z = - d
@@ -440,19 +440,19 @@ def interpolate_A_I_from_r_perp(R, a, d, I, r_perp_max, resolution = 100000, deb
 
 # dr_perp should be notably smaller then the grid size in the original 3D space.
 def dA_I_dr_perp(r_perp, dr_perp, R, a, d, I, interpolator, debug = 0):
-    # Get my 2 values of A_I   
+    # Get my 2 values of A_I
     A_Ia = interpolator(r_perp - dr_perp)
     A_Ib = interpolator(r_perp + dr_perp)
-    
+
     # Numerical differentiation
     out = (A_Ib - A_Ia) / (2.0 * dr_perp)
-    
+
     # Debugging
     if debug > 0:
-        print 'dA_I_dr_perp: ' + str(out)
+        print('dA_I_dr_perp: ' + str(out))
     if debug > 1:
-        print '  dA_I_dr_perp  A_Ia: ' + str(A_Ia)
-        print '  dA_I_dr_perp  A_Ib: ' + str(A_Ib)
+        print('  dA_I_dr_perp  A_Ia: ' + str(A_Ia))
+        print('  dA_I_dr_perp  A_Ib: ' + str(A_Ib))
     return out
 
 
@@ -463,13 +463,13 @@ def dA_I_dx(x, y, z, R, a, d, I, Dx, debug = 0):
 
     # Out
     out = (A_I_x_plus_1 - A_I_x_minus_1)/(2.0*Dx)
-    
+
     # Debugging
     if debug > 0:
-        print 'dA_I_dx: ' + str(out)
+        print('dA_I_dx: ' + str(out))
     if debug > 1:
-        print '  dA_I_dx  A_I_x_minus_1: ' + str(A_I_x_minus_1)
-        print '  dA_I_dx  A_I_x_plus_1: ' + str(A_I_x_plus_1)        
+        print('  dA_I_dx  A_I_x_minus_1: ' + str(A_I_x_minus_1))
+        print('  dA_I_dx  A_I_x_plus_1: ' + str(A_I_x_plus_1))
     # Output
     return out
 
@@ -481,27 +481,27 @@ def B_I(x, y, z, R, a, d, I, Dx, A_I_r_perp_interpolator, debug = 0):
     dA_I_dx_val = dA_I_dx(x, y, z, R, a, d, I, Dx, debug - 2)
     r_perp = r_perpendicular_scalar(y, z, d, debug - 2)
     r_perp_vec = r_perpendicular_vector(y, z, d, debug - 2)
-    
+
     # To get dA_I_dr_perp we use inperpolation to get A_I(r_perp).
     dA_I_dr_perp_val = dA_I_dr_perp(r_perp, Dx * 0.2, R, a, d, I, A_I_r_perp_interpolator, debug - 2)
-    
+
     # Parts
     part_1 = - dA_I_dx_val * ( r_perp_vec / r_perp )
     #print '1: ' + str(part_1)
     part_2 = np.array([dA_I_dr_perp_val + ( A_I_val / r_perp ), 0, 0])
-    #print '2: ' + str(part_2) + '\n'    
-    
+    #print '2: ' + str(part_2) + '\n'
+
     # Output
     out = np.add(part_1,part_2)
-    
+
     # Debugging
     if debug > 0:
-        print 'B_I: ' + str(out)
+        print('B_I: ' + str(out))
     if debug > 1:
-        print '  B_I  part_1: ' + str(part_1)
-        print '  B_I  part_2: ' + str(part_2) + '\n'
+        print('  B_I  part_1: ' + str(part_1))
+        print('  B_I  part_2: ' + str(part_2) + '\n')
     return out
-    
+
 
 if __name__ == '__main__':
     # User-specified parameters
@@ -509,7 +509,7 @@ if __name__ == '__main__':
     x_range = ( -80.0, 80 ) * u.Mm
     y_range = ( -80.0, 80 ) * u.Mm
     z_range =  ( 0.0, 120 ) * u.Mm
-    
+
     # Derived parameters (make SI where applicable)
     x_0 = x_range[0].to(u.m).value
     Dx = (( x_range[1] - x_range[0] ) / ( tup_shape[0] * 1.0 )).to(u.m).value
@@ -520,11 +520,11 @@ if __name__ == '__main__':
     z_0 = z_range[0].to(u.m).value
     Dz = (( z_range[1] - z_range[0] ) / ( tup_shape[2] * 1.0 )).to(u.m).value
     z_size = Dy * tup_shape[2]
-    
-    # For B_I field only, to save re-creating this interpolator for every cell.
-    A_I_r_perp_interpolator = interpolate_A_I_from_r_perp(flo_TD_R, flo_TD_a, flo_TD_d, flo_TD_I, (x_size**2 + y_size**2 + z_size**2)**(0.5)*1.2, 1000`0)
 
-    field = np.zeros( ( tup_shape[0], tup_shape[1], tup_shape[2], 3 ) ) 
+    # For B_I field only, to save re-creating this interpolator for every cell.
+    A_I_r_perp_interpolator = interpolate_A_I_from_r_perp(flo_TD_R, flo_TD_a, flo_TD_d, flo_TD_I, (x_size**2 + y_size**2 + z_size**2)**(0.5)*1.2, 10000)
+
+    field = np.zeros( ( tup_shape[0], tup_shape[1], tup_shape[2], 3 ) )
     for i in range(0, tup_shape[0]):
         for j in range(0, tup_shape[1]):
             for k in range(0, tup_shape[2]):
@@ -532,23 +532,18 @@ if __name__ == '__main__':
                 x_pos = x_0 + ( i + 0.5 ) * Dx
                 y_pos = y_0 + ( j + 0.5 ) * Dy
                 z_pos = z_0 + ( k + 0.5 ) * Dz
-                
+
                 #field[i,j,k] = B_theta(x_pos, y_pos, z_pos, flo_TD_a, flo_TD_d, flo_TD_R, flo_TD_I, flo_TD_I_0)
                 #field[i,j,k] = B_q(x_pos, y_pos, z_pos, flo_TD_L, flo_TD_d, flo_TD_q)
                 #field[i,j,k] = B_I(x_pos, y_pos, z_pos, flo_TD_R, flo_TD_a, flo_TD_d, flo_TD_I, Dx, A_I_r_perp_interpolator)
                 field[i,j,k] = B_theta(x_pos, y_pos, z_pos, flo_TD_a, flo_TD_d, flo_TD_R, flo_TD_I, flo_TD_I_0) + B_q(x_pos, y_pos, z_pos, flo_TD_L, flo_TD_d, flo_TD_q) + B_I(x_pos, y_pos, z_pos, flo_TD_R, flo_TD_a, flo_TD_d, flo_TD_I, Dx, A_I_r_perp_interpolator)
-                                
-                
-     
-        
+
+
+
+
     map_field = Map3D( field, {}, xrange=x_range, yrange=y_range, zrange=z_range )
     np_boundary_data = field[:,:,0,2].T
     dummyDataToMap(np_boundary_data, x_range, y_range)
-    
+
     #dic_boundary_data = { 'datavals': np_boundary_data.data.shape[0]**2, 'dsun_obs': 147065396219.34,  }
     visualise(map_field, scale=1.0*u.Mm, show_volume_axes=True, debug=True)
-     
-        
-        
-        
-    

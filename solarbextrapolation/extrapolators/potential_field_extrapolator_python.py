@@ -29,6 +29,19 @@ def phi_extrapolation_python(boundary, shape, Dx, Dy, Dz):
     Function to extrapolate the scalar magnetic field above the given boundary
     data.
     This implementation runs in python and so is very slow for larger datasets.
+
+    Parameters
+    ----------
+    boundary : array-like
+        Magnetogram boundary data
+    shape : array-like
+        Dimensions of of the extrapolated volume, (nx,ny,nz)
+    Dx : `float`
+        Spacing in x-direction, in units of the boundary map
+    Dy : `float`
+        Spacing in y-direction, in units of the boundary map
+    Dz : `float`
+        Spacing in z-direction, in chosen units
     """
 
     # Derived parameters
@@ -38,9 +51,9 @@ def phi_extrapolation_python(boundary, shape, Dx, Dy, Dz):
     z_submerge = Dz / np.sqrt(2.0 * np.pi)
 
     # Create the empty numpy volume array.
-    D = np.empty((shape[0], shape[1], shape[2]), dtype=np.float)
+    D = np.empty((shape[1], shape[0], shape[2]), dtype=np.float)
 
-    i_prime, j_prime = np.indices((shape[0], shape[1]))
+    i_prime, j_prime = np.indices((shape[1], shape[0]))
     xP = i_prime * Dx
     yP = j_prime * Dy
 
@@ -59,5 +72,5 @@ def phi_extrapolation_python(boundary, shape, Dx, Dy, Dz):
                 G_n = Gn_5_2_29(x, y, z, xP, yP, DxDy, z_submerge)
 
                 # Now add this to the 3D grid.
-                D[i, j, k] = np.sum(boundary * G_n * DxDy)
+                D[j, i, k] = np.sum(boundary * G_n * DxDy)
     return D
