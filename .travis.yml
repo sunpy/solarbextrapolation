@@ -8,7 +8,7 @@ env:
     - NUMPY_VERSION='stable'
     - ASTROPY_VERSION='stable'
     - MAIN_CMD='python setup.py'
-    - CONDA_DEPENDENCIES='numpy scipy matplotlib pytest astropy sunpy sphinx mayavi'
+    - CONDA_DEPENDENCIES='scipy matplotlib pytest sunpy sphinx mayavi'
     - CONDA_CHANNELS='openastronomy'
     - SETUP_XVFB=True
   matrix:
