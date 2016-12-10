@@ -1,25 +1,22 @@
 # The language in this case has no bearing - we are going to be making use of "conda" for a
 # python distribution for the scientific python stack.
 language: c
-
+sudo: false
 env:
-    global:
-        - TARGET_ARCH="x64"
-        - CONDA_INSTALL_LOCN="${HOME}/conda"
-    matrix:
-        - CONDA_PY=2.7  CONDA_NPY=1.9
-
+  global:
+    - PYTHON_VERSION=2.7
+    - NUMPY_VERSION='stable'
+    - ASTROPY_VERSION='stable'
+    - MAIN_CMD='python setup.py'
+    - CONDA_DEPENDENCIES='numpy scipy matplotlib pytest astropy sunpy sphinx mayavi'
+    - CONDA_CHANNELS='openastronomy'
+    - SETUP_XVFB=True
+  matrix:
+    - SETUP_CMD='install'
+    - SETUP_CMD='build_sphinx'
+    - SETUP_CMD='test'
 install:
-    - python ./Obvious-CI/bootstrap-obvious-ci-and-miniconda.py ${CONDA_INSTALL_LOCN} ${TARGET_ARCH} ${CONDA_PY::1} --without-obvci
-    - source ${CONDA_INSTALL_LOCN}/bin/activate root
-    - conda config --set always_yes true
-    - conda update conda
-    - conda config --add channels sunpy --add channels astropy --add channels astropy-ci-extras --add channels https://conda.binstar.org/sunpy/channel/citesting
-    - conda create -n testing python=$CONDA_PY numpy=$CONDA_NPY && source activate testing
-    - conda install sunpy mayavi
-
+  - git clone https://github.com/astropy/ci-helpers.git
+  - source ci-helpers/travis/setup_conda_${TRAVIS_OS_NAME}.sh
 script:
-    - # Update the conda recipe's meta.yaml with an appropriate version.
-    - python setup.py test
-    - echo "What?!"
-
+  - $MAIN_CMD $SETUP_CMD
