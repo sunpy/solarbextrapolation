@@ -1,6 +1,0 @@
-numpy
-matplotlib
-astropy-helpers
-astropy
-git+https://github.com/sphinx-gallery/sphinx-gallery.git
-sunpy>=0.6.1
