@@ -9,7 +9,7 @@ env:
     - ASTROPY_VERSION='stable'
     - MAIN_CMD='python setup.py'
     - CONDA_DEPENDENCIES='scipy matplotlib pytest sunpy sphinx mayavi'
-    - CONDA_CHANNELS='openastronomy'
+    - CONDA_CHANNELS='openastronomy conda-forge'
     - SETUP_XVFB=True
   matrix:
     - SETUP_CMD='install'
