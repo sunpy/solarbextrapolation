@@ -7,6 +7,7 @@ This is a temporary script file.
 
 import pytest
 import tempfile
+import pkg_resources
 
 import numpy as np
 import os
@@ -134,7 +135,9 @@ def test_potential_extrapolator_subclass():
     shape = u.Quantity([5, 5, 5] * u.pixel)
 
     # Load HMI map (from fits file) then submap and resample.
-    map_boundary = sunpy.map.Map('..//data//sdo-hmi_2011-02-14_20-34-12.fits')
+    hmi_filename = pkg_resources.resource_filename('solarbextrapolation',
+                                                   'data/sdo-hmi_2011-02-14_20-34-12.fits')
+    map_boundary = sunpy.map.Map(hmi_filename)
     map_boundary = map_boundary.submap(xrange, yrange).resample(shape[0:2], method='linear')
     
     # Extrapolate using python native code
