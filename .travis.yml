@@ -8,13 +8,13 @@ env:
     - NUMPY_VERSION='stable'
     - ASTROPY_VERSION='stable'
     - MAIN_CMD='python setup.py'
-    - CONDA_DEPENDENCIES='scipy matplotlib pytest sunpy sphinx mayavi'
+    - CONDA_DEPENDENCIES='scipy matplotlib pytest sunpy sphinx mayavi sphinx-gallery'
     - CONDA_CHANNELS='conda-forge'
     - SPHINX_VERSION='1.5'
     - SETUP_XVFB=True
   matrix:
     - SETUP_CMD='install'
-    - SETUP_CMD='build_sphinx'
+    - SETUP_CMD='build_docs'
     - SETUP_CMD='test'
 install:
   - git clone https://github.com/astropy/ci-helpers.git
