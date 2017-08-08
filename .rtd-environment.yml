@@ -9,7 +9,7 @@ dependencies:
 - mayavi
 - mock
 - scipy
-- sphinx
+- sphinx=1.5
 - sphinx-gallery
 - sphinx_rtd_theme
 - sunpy
