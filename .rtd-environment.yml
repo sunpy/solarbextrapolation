@@ -4,12 +4,12 @@ channels:
 dependencies:
 - python=2.7
 - astropy
-- numpy
+- numpy=1.12
 - matplotlib
 - mayavi
 - mock
 - scipy
-- sphinx=1.5
+- sphinx
 - sphinx-gallery
 - sphinx_rtd_theme
 - sunpy
