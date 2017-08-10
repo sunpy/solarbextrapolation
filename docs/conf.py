@@ -119,8 +119,6 @@ version = package.__version__.split('-', 1)[0]
 release = package.__version__
 
 
-extensions += ['sphinx.ext.mathjax']
-
 # -- Options for HTML output ---------------------------------------------------
 
 # A NOTE ON HTML THEMES

@@ -33,7 +33,7 @@ class SeedStreamline(Streamline):
     >>> from solarbextrapolation.mayavi_seed_streamlines import SeedStreamline
     >>> import numpy as np
     >>> seeds = [[1, 2, 5], [3, 4, 5]]
-    >>> field_lines = SeedStreamline(seed_points = np.array(seeds))
+    >>> field_lines = SeedStreamline(seed_points = np.array(seeds)) #doctest: +SKIP
     >>> myvectorfield.add_child(field_lines) #doctest: +SKIP
     """
 
