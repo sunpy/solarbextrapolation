@@ -2,7 +2,7 @@ name: solarbextrapolation-rtd
 channels:
   - conda-forge
 dependencies:
-  - python=2.7
+  - python=3
   - astropy
   - numpy=1.12
   - matplotlib
