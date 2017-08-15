@@ -67,7 +67,6 @@ else:
 
     extensions += ['sphinx_gallery.gen_gallery']
 
-    #html_static_path = ['_static', sphinxgallery.path_static()]
     try:
         from mayavi import mlab
         find_mlab_figures = True
@@ -76,8 +75,8 @@ else:
         find_mlab_figures = False
 
     sphinx_gallery_conf = {'find_mayavi_figures': find_mlab_figures,
-                        'gallery_dirs': 'auto_examples',
-                        'examples_dirs': '../examples'}
+                           'gallery_dirs': 'auto_examples',
+                           'examples_dirs': '../examples'}
 
 
 # -- General configuration ----------------------------------------------------
@@ -136,9 +135,7 @@ release = package.__version__
 # a list of builtin themes. To override the custom theme, set this to the
 # name of a builtin theme or the name of a custom theme in html_theme_path.
 try:
-    import sphinx_rtd_theme
-    html_theme = 'sphinx_rtd_theme'
-    html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
+    from sunpy_sphinx_theme.conf import *
 except ImportError:
     html_theme = 'default'
 # Custom sidebar templates, maps document names to template names.

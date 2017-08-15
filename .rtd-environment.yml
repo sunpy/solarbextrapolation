@@ -1,15 +1,17 @@
 name: solarbextrapolation-rtd
 channels:
-- conda-forge
+  - conda-forge
 dependencies:
-- python=2.7
-- astropy
-- numpy=1.12
-- matplotlib
-- mayavi
-- mock
-- scipy
-- sphinx
-- sphinx-gallery
-- sphinx_rtd_theme
-- sunpy
+  - python=2.7
+  - astropy
+  - numpy=1.12
+  - matplotlib
+  - mayavi
+  - mock
+  - scipy
+  - sphinx
+  - sphinx-gallery
+  - sphinx_rtd_theme
+  - sunpy
+  - pip:
+    - sunpy-sphinx-theme
