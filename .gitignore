@@ -58,3 +58,5 @@ docs/auto_examples/*
 
 # PyBuilder
 target/
+
+cython_version.py
