@@ -50,7 +50,7 @@ aMap.peek()
 # To manually position poles, simply build lists of parameters for each pole.
 # It's often easiest to use percentage units for location/size, wheer we compare
 # to the maps region.
-#arrA0 = [ Position, size, Max Magnitude ]
+# arrA0 = [ Position, size, Max Magnitude ]
 arrA0 = [ u.Quantity([ 25, 25 ] * u.percent), 10.0 * u.percent,  0.2 * u.T ]
 arrA1 = [ u.Quantity([ 75, 75 ] * u.percent), 10.0 * u.percent, -0.2 * u.T ]
 
@@ -78,4 +78,3 @@ aMap.peek()
 ##############################################################################
 # And being a map you can use all the normal SunPy functions, such as saving
 # the map using aMap.save(filepath).
-

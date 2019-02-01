@@ -45,7 +45,7 @@ class PreZeros(Preprocessors):
 ###########################################################################
 # Make an input map that we will run the preprocessor on.
 # This will be changed to using the sample HMI image.
-#aMap2D = mp.Map('C://git//solarextrapolation//solarextrapolation//data//example_data_(100x100)__01_hmi.fits')
+# aMap2D = mp.Map('C://git//solarextrapolation//solarextrapolation//data//example_data_(100x100)__01_hmi.fits')
 from solarbextrapolation.example_data_generator import generate_example_data, dummyDataToMap
 import astropy.units as u
 aMap2D = arr_Data = dummyDataToMap(generate_example_data([ 20, 20 ],u.Quantity([ -10.0, 10.0 ] * u.arcsec),u.Quantity([ -10.0, 10.0 ] * u.arcsec)), u.Quantity([ -10.0, 10.0 ] * u.arcsec), u.Quantity([ -10.0, 10.0 ] * u.arcsec))
