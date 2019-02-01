@@ -210,4 +210,3 @@ if __name__ == '__main__':
     #dic_boundary_data = { 'datavals': np_boundary_data.data.shape[0]**2, 'dsun_obs': 147065396219.34,  }
     visualise(map_field, scale=1.0*u.Mm, show_volume_axes=True, debug=True)
     """
-
