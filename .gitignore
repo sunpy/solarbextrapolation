@@ -54,6 +54,9 @@ coverage.xml
 docs/_build/
 docs/api/
 solarbextrapolation/version.py
+docs/auto_examples/*
 
 # PyBuilder
 target/
+
+cython_version.py

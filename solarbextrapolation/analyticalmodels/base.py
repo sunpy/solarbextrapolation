@@ -23,7 +23,7 @@ from sunpy.sun import constants, sun
 from sunpy.time import parse_time, is_time
 from astropy.table import Table
 import astropy.units as u
-from mayavi import mlab
+# from mayavi import mlab
 
 # Internal imports
 #from solarbextrapolation.utilities import si_this_map
@@ -122,7 +122,7 @@ class AnalyticalModel(object):
         """
         return self.magnetogram
 
-if __name__ == '__main__':
+'''if __name__ == '__main__':
     # User-specified parameters
     tup_shape = ( 20, 20, 20 )
     x_range   = ( -80.0,  80 ) * u.Mm
@@ -209,5 +209,4 @@ if __name__ == '__main__':
 
     #dic_boundary_data = { 'datavals': np_boundary_data.data.shape[0]**2, 'dsun_obs': 147065396219.34,  }
     visualise(map_field, scale=1.0*u.Mm, show_volume_axes=True, debug=True)
-    """
-
+    """'''

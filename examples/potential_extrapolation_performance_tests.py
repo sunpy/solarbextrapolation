@@ -38,9 +38,9 @@ zrange = u.Quantity([ 0,     20.0 ] * u.arcsec)
 
 ##############################################################################
 # Note that you could easily choose any grid dimensions:
-#  e.g. [ [ 100, 100, 200 ] ]
+# e.g. [ [ 100, 100, 200 ] ]
 # or add more then one grid shape in the list:
-#  e.g. [ [ 10, 10, 10 ],[ 50, 50, 50 ], [ 100, 100, 100 ] ]
+# e.g. [ [ 10, 10, 10 ],[ 50, 50, 50 ], [ 100, 100, 100 ] ]
 # to make the test more grid-size agnostic, but this will notably increase
 # runtime.
 
@@ -55,8 +55,8 @@ arrA2 = [ u.Quantity([ 25, 75 ] * u.percent), 10.0 * u.percent,  0.1 * u.T ]
 arrA3 = [ u.Quantity([ 75, 25 ] * u.percent), 10.0 * u.percent, -0.1 * u.T ]
 
 # Generate the datasets and maps
-#lis_maps = []
-#lis_extrapolators = []
+# lis_maps = []
+# lis_extrapolators = []
 
 ##############################################################################
 # You will create an astropy table to store the runtimes of the extrapolations.
@@ -109,5 +109,3 @@ for extrapolation in lis_datasets:
 ##############################################################################
 # You can now see the results in the table.
 print t
-
-
