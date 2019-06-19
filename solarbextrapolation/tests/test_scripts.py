@@ -98,7 +98,7 @@ def test_create_and_run_preprocessor_subclass():
     aPrePro = PreZeros(aMap2D.submap([0,10]*u.arcsec, [0,10]*u.arcsec))
     aPreProData = aPrePro.preprocess()
 
-	
+
 # Tests for the extrapolator class
 
 def test_create_and_run_extrapolator_subclass():
@@ -139,12 +139,10 @@ def test_potential_extrapolator_subclass():
                                                    'data/sdo-hmi_2011-02-14_20-34-12.fits')
     map_boundary = sunpy.map.Map(hmi_filename)
     map_boundary = map_boundary.submap(xrange, yrange).resample(shape[0:2], method='linear')
-    
+
     # Extrapolate using python native code
     aPotExt = PotentialExtrapolator(map_boundary, zshape=shape[2].value, zrange=zrange)
     aMap3D = aPotExt.extrapolate(enable_numba=False)
-    
+
     # Extrapolate using numba
     aMap3D = aPotExt.extrapolate()
-
-

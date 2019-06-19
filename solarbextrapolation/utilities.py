@@ -156,7 +156,3 @@ def si_this_map(map):
 
     # Return the modified map
     return mp.Map((data, meta))
-
-
-
-
