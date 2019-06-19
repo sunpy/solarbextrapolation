@@ -4,7 +4,7 @@ language: c
 sudo: false
 env:
   global:
-    - PYTHON_VERSION=2.7
+    - PYTHON_VERSION=3.7
     - NUMPY_VERSION='stable'
     - ASTROPY_VERSION='stable'
     - MAIN_CMD='python setup.py'
